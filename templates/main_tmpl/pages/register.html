@@ -52,7 +52,7 @@
                         <i class="ti-user text-primary"></i>
                       </span>
                     </div>
-                    <input type="text" name="first_name" class="form-control form-control-lg border-left-0" placeholder="Nom" required>
+                    <input type="text" value="{{first_name}}" name="first_name" class="form-control form-control-lg border-left-0" placeholder="Nom" required>
                   </div>
                 </div>
                 <div class="form-group">
@@ -63,7 +63,7 @@
                         <i class="ti-user text-primary"></i>
                       </span>
                     </div>
-                    <input type="text" name="last_name" class="form-control form-control-lg border-left-0" placeholder="Prenom" required>
+                    <input type="text" value="{{last_name}}" name="last_name" class="form-control form-control-lg border-left-0" placeholder="Prenom" required>
                   </div>
                 </div>
                 <div class="form-group">
@@ -74,7 +74,7 @@
                         <i class="ti-email text-primary"></i>
                       </span>
                     </div>
-                    <input type="email" name="email" class="form-control form-control-lg border-left-0" placeholder="Email" required>
+                    <input type="email" value="{{email}}" name="email" class="form-control form-control-lg border-left-0" placeholder="Email" required>
                   </div>
                 </div>
                <!--<div class="form-group">
@@ -102,7 +102,7 @@
                         <i class="ti-lock text-primary"></i>
                       </span>
                     </div>
-                    <input type="password" name="password" class="form-control form-control-lg border-left-0" id="exampleInputPassword" placeholder="Password">                        
+                    <input type="password" value="{{password}}" name="password" class="form-control form-control-lg border-left-0" id="exampleInputPassword" placeholder="Password">                        
                   </div>
                 </div>
                 <div class="form-group">
@@ -113,14 +113,24 @@
                         <i class="ti-lock text-primary"></i>
                       </span>
                     </div>
-                    <input type="password" name="confirm_pass" class="form-control form-control-lg border-left-0" id="exampleInputPassword" placeholder="Password" required>                        
+                    <input type="password" value="{{confirm_pass}}" name="confirm_pass" class="form-control form-control-lg border-left-0" id="exampleInputPasswordcnf" placeholder="Password" required>                        
                   </div>
+                </div>
+                 <div class="my-2 d-flex justify-content-between align-items-center">
+                   <a href="#" class="auth-link text-black"></a>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="checkbox" class="form-check-input" id="show_pwd">
+                      Voir password
+                    </label>
+                  </div>
+                 
                 </div>
                 <div class="mb-4">
                   <div class="form-check">
                     <label class="form-check-label text-muted">
-                      <input type="checkbox" class="form-check-input">
-                      I agree to all Terms & Conditions
+                      <input type="checkbox" class="form-check-input" required>
+                      J'accepte tout les termes et conditions d'utilisation
                     </label>
                   </div>
                 </div>
@@ -128,7 +138,7 @@
                   <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn" href="../../index.html">CREER UN COMPTE</button>
                 </div>
                 <div class="text-center mt-4 font-weight-light">
-                  Already have an account? <a href="{% url 'user_login' %}" class="text-primary">Login</a>
+                 Avez vous deja un compte ? <a href="{% url 'user_login' %}" class="text-primary">Se connecter</a>
                 </div>
               </form>
             </div>
@@ -151,6 +161,7 @@
   <script src="{% static 'main_tmpl/js/hoverable-collapse.js' %}"></script>
   <script src="{% static 'main_tmpl/js/template.js' %}"></script>
   <script src="{% static 'main_tmpl/js/todolist.js' %}"></script>
+   <script src="{% static 'main_tmpl/js/scripts.js' %}"></script>
   <!-- endinject -->
 </body>
 

@@ -53,11 +53,20 @@ def check_password(password):
 class UserLogin(View):
 
     def get(self, request):
-
+        if request.user.is_authenticated:
+            return redirect("dashboard")
         return render(request, 'main_tmpl/pages/login.html')
     
     def post(self, request):
         data=request.POST.dict()
+        if data['identifiant'] and User.objects.filter(username=data['identifiant']).exists():
+            user=User.objects.get(username=data['identifiant'])
+            if not user.is_active:
+                request.session['user_id']=user.username
+                send_verification_code(user, title="ICARTABLE! Code de verification") 
+                return redirect("verify_code")
+
+
         user = authenticate(username=data['identifiant'], password=data['password'])
         if user is not None:
             login(request,user)
@@ -72,11 +81,7 @@ class UserLogin(View):
 class UserReg(View):
 
     def get(self, request):
-        data={
-            'is_success':True
-        }
-
-        return render(request, "main_tmpl/pages/register.html",data)
+        return render(request, "main_tmpl/pages/register.html")
     
     def post(self,request):
         user_data={}
@@ -123,103 +128,142 @@ class UserReg(View):
         return redirect("verify_code")
 
 
+class VerifyAccount(View):
+
+    def get(sefl, request):
+        return render(request, "main_tmpl/pages/verify_code.html")
+    
+    def post(self, request):
+        data={
+            "code":request.POST.dict().get("code"),
+            "user":User.objects.get(username=request.session['user_id']) if 'user_id' in request.session.keys() and User.objects.filter(username=request.session['user_id']).exists() else None
+        }
+        if not data['user']:
+            messages.error(request, "Utilisateur non reconnu, etes vous connecter ?")
+            return render(request, "main_tmpl/pages/verify_code.html",data)
+
+        if data['code']:
+            try:
+                check_code=check_code=VerificationCode.objects.filter(user=data['user'], code=data['code']).latest('created_at')
+                if check_code.is_valid():
+                    data['user'].is_active=True
+                    data['user'].save()
+                    data['activated']=True
+                    return render(request, "main_tmpl/pages/verify_code.html",data)
+                data['expiry_code']=True
+                messages.error(request, "Le delai pour ce code est deja exprirer!")
+            except VerificationCode.DoesNotExist:
+                messages.error(request, "Ce code est invalide!")
+        return render(request, "main_tmpl/pages/verify_code.html",data)
+
+
 class UserResetPassword(View):
 
     def get(self, request):
 
-        return render(request, 'docs_tmpl/forgot_pass.html')
+        return render(request, 'main_tmpl/pages/forgot_pass.html')
     
     def post(self, request):
-        email=request.POST.dict().get('email', None)
-        if not email_valide(email):
+        data={
+            "email":request.POST.dict().get('email', None)
+        }
+
+        if not email_valide(data['email']):
             messages.error(request, "Veuillez inserer une adresse email valide svp!")
-            return render(request, 'docs_tmpl/forgot_pass.html',{"email":email})
+            return render(request, 'main_tmpl/pages/forgot_pass.html',data)
+
+        if not User.objects.filter(email=data['email']).exists():
+            messages.error(request, "Aucun utilisateur trouve avec cette adresse email!")
+            return render(request, 'main_tmpl/pages/forgot_pass.html',data)
+        user=User.objects.get(email=data['email'])
+        request.session['user_id']=user.username
+        send_verification_code(user, title="ICARTABLE! Code de verification")
+
         return redirect("reset_pass")
     
-class ResetPassCodeCheck(View):
+class ResetPassCodeCheck(View):   
 
     def get(self, request):
+        print(request.session)
+        return render(request, 'main_tmpl/pages/forgot_pass_verify_code.html')
 
-        return render(request, 'docs_tmpl/check_rest_code.html')
-    
     def post(self, request):
+        data={
+            "code":request.POST.dict().get("code")
+        }
+        if not "user_id" in request.session.keys() or not User.objects.filter(username=request.session['user_id']).exists():
+            messages.error(request, "Votre sesion a expirer veuillez recommencer!")
+            return redirect("reset_pass")
+        
+        data['user']=User.objects.get(username=request.session['user_id'])
 
-        return redirect("new_password")
+        if data['code']:
+            try:
+                check_code=VerificationCode.objects.filter(user=data['user'], code=data['code']).latest('created_at')
+                if check_code.is_valid():
+                    return redirect("new_password")
+                data['expiry_code']=True
+                messages.error(request, "Le delai pour ce code est deja exprirer!")
+                return render(request, 'main_tmpl/pages/forgot_pass_verify_code.html',data)
+            except VerificationCode.DoesNotExist:
+                messages.error(request, "Ce code est invalide!")
+        else:
+            messages.error(request, "Veuillez inserer un code valide svp!")
+        return render(request, 'main_tmpl/pages/forgot_pass_verify_code.html',data)
+
+        
 
 class NewPassword(View):
 
     def get(self, request):
 
-        return render(request, 'docs_tmpl/new_password.html')
+        return render(request, 'main_tmpl/pages/new_password.html')
     
     def post(self,request):
-        data={'change_successs':True}
-        return render(request, 'docs_tmpl/new_password.html',data)
-
-
-class VerifyAccount(View):
-
-    def get(self, request):
-        data={}
-        code=request.POST.get("code",None)
-        if not request.session['user_id']:
-            messages.error(request, "Vous devez etre connectez pour verifier votre compte!")
-            return render(request, "docs_tmpl/verify_code.html")
-        user=User.objects.get(username=request.session['user_id'])
-        if user.is_active:
-            #messages.success(request, "Bravo! votre compte est verifiez! vous pouvez profitez de nos services.")
-            data['code_verif']=True
-
-        return render(request, "docs_tmpl/verify_code.html",data)
-    
-    def post(self, request):
-        data={}
-        code=request.POST.get("code",None)
-        if not request.session['user_id']:
-            messages.error(request, "Vous devez etre connectez pour verifier votre compte!")
-            return render(request, "docs_tmpl/verify_code.html")
-        user=User.objects.get(username=request.session['user_id'])
-        if user.is_active:
-            messages.success(request, "Bravo! votre compte est verifiez! vous pouvez profitez de nos services.")
-            return render(request, "docs_tmpl/verify_code.html")
-        if not code:
-            messages.error(request, "Veuillez inserer le code svp!")
-            return render(request, "docs_tmpl/verify_code.html")
+        data={
+            "password":request.POST.dict().get('password'),
+            "confirm_password":request.POST.dict().get('confirm_pass')
+        }
+        if not data['password'] == data['confirm_password']:
+            messages.error(request, "Le password et confirm pass doivent etre identique")
+        if not check_password(data['password']):
+            messages.error(request, "Le mot de passe doit etre superieur ou egale a 6 caracteres, vous devez melanger les lettre, chiffres et caracteres speciaux pour un mot de passe solide.")
+        if not "user_id" in request.session.keys():
+            messages.error(request,"Votre session a expirer, veuillez recommencer!")
+        
         try:
-            check_code=VerificationCode.objects.filter(user=user, code=code).latest('created_at')
-        except VerificationCode.DoesNotExist:
-            messages.error(request, "Code invalide!, vous avez inserer un code invalide.")
-            return render(request, "docs_tmpl/verify_code.html")
-        if not check_code.is_valid():
-            data['code_expiry']=True
-            messages.error(request, "Code expire, vous avez depasser le delai de 10 minutes.")
-            return render(request, "docs_tmpl/verify_code.html")
-        else:
-            #we activate this account
-            try:
-                user=User.objects.get(username=request.session['user_id'])
-                user.is_active=True
-                user.save()
-            except User.DoesNotExist:
-                messages.error(request, "Ce compte utilisateur n'existe pas/plus, veuillez vous reconnecter!")
-                return render(request, "docs_tmpl/verify_code.html")
-        data['code_verif']=True
-        if request.session['is_reg']:
-            data['user_identifiant']=request.session['user_id']
-        messages.success(request, "Bravo!, code verifier avec success!")
-        return render(request, "docs_tmpl/verify_code.html",data)
+            user=User.objects.get(username=request.session['user_id'])
+            user.set_password(data['password'])
+            user.save()
+            data['is_done']=True
+            data['user']=user
+        except:
+            messages.error(request,"Votre session a expirer, veuillez recommencer!")
+
+        return render(request, 'main_tmpl/pages/new_password.html',data)
 
 
 class Dashboard(LoginRequiredMixin, View):
 
     def get(self,request):
-        data={}
-        user=request.user
-        data['user_id']=user.username
-        data['first_name']=user.first_name
-        data['last_name']=user.last_name
+        data={
+            "user":request.user
+        }
         return render(request, "main_tmpl/dashboard.html",data)
 
+
+def send_code(request):
+    next_url=request.GET.dict().get("next")
+    if "user_id" in request.session.keys():
+        user=User.objects.get(username=request.session['user_id'])
+    else:
+        if request.user.is_authenticated:
+            user=request.user
+    send_verification_code(user, title="ICARTABLE! Code de verification")
+    messages.success(request, "Envoyer Ok!")
+    if next_url:
+        return redirect(next_url)
+    return redirect("verify_code")
 
 def logout_view(request):
     logout(request)

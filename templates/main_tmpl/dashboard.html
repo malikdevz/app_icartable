@@ -253,7 +253,11 @@
             <div class="col-md-12 grid-margin">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
-                  <h4 class="font-weight-bold mb-0">Hello! {{first_name}} {{last_name}}</h4>
+                  {% if user.is_superuser %}
+                  <h4 class="font-weight-bold mb-0">Hello! Admin</h4>
+                  {% else %}
+                  <h4 class="font-weight-bold mb-0">Hello! {{user.first_name}} {{user.last_name}}</h4>
+                  {% endif %}
                 </div>
                 <div>
                     <button type="button" class="btn btn-primary btn-icon-text btn-rounded text-white text-bold">
