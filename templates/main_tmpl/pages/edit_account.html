@@ -6,7 +6,7 @@
   <!-- Required meta tags -->
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <title>RoyalUI Admin</title>
+  <title>ICARTABLE Mon profile</title>
   <!-- plugins:css -->
   <link rel="stylesheet" href="{% static 'main_tmpl/vendors/ti-icons/css/themify-icons.css' %}">
   <link rel="stylesheet" href="{% static 'main_tmpl/vendors/base/vendor.bundle.base.css' %}">
@@ -17,6 +17,11 @@
   <link rel="stylesheet" href="{% static 'main_tmpl/css/style.css' %}">
   <!-- endinject -->
   <link rel="shortcut icon" href="{% static 'main_tmpl/images/favicon.png' %}" />
+  <style>
+    li{
+        border: 0px !important;
+    }
+  </style>
 </head>
 <body>
   <div class="container-scroller">
@@ -199,91 +204,122 @@
               </div>
             </div>
           </div>
-          {% include 'main_tmpl/partials/_stats.html' %}
-          {% include 'main_tmpl/partials/_charts.html' %}
-          
-          {% comment %}{% include 'main_tmpl/partials/_top_prod.html' %}{% endcomment %}
+        
           <div class="row">
             <div class="col-md-12 grid-margin stretch-card">
               <div class="card position-relative">
                 <div class="card-body">
-                  <p class="card-title">Detailed Reports</p>
+                  <p class="card-title">Mes infos</p>
                   <div class="row">
                     <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-center">
                       <div class="ml-xl-4">
-                        <h1>33500</h1>
-                        <h3 class="font-weight-light mb-xl-4">Sales</h3>
-                        <p class="text-muted mb-2 mb-xl-0">The total number of sessions within the date range. It is the period time a user is actively engaged with your website, page or app, etc</p>
+                        <img src="{% static 'main_tmpl/images/faces/face2.jpg' %}" class="img col-12"/>
+                        <button type="button" class="btn btn-outline-light btn-icon-text my-2">
+                          <i class="ti-upload btn-icon-prepend"></i>                                                    
+                          Changer photo
+                        </button>
                       </div>  
                     </div>
                     <div class="col-md-12 col-xl-9">
                       <div class="row">
-                        <div class="col-md-6 mt-3 col-xl-5">
-                          <canvas id="north-america-chart"></canvas>
-                          <div id="north-america-legend"></div>
-                        </div>
-                        <div class="col-md-6 col-xl-7">
-                          <div class="table-responsive mb-3 mb-md-0">
-                            <table class="table table-borderless report-table">
-                              <tr>
-                                <td class="text-muted">Illinois</td>
-                                <td class="w-100 px-0">
-                                  <div class="progress progress-md mx-4">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 70%" aria-valuenow="70" aria-valuemin="0" aria-valuemax="100"></div>
-                                  </div>
-                                </td>
-                                <td><h5 class="font-weight-bold mb-0">524</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">Washington</td>
-                                <td class="w-100 px-0">
-                                  <div class="progress progress-md mx-4">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 30%" aria-valuenow="30" aria-valuemin="0" aria-valuemax="100"></div>
-                                  </div>
-                                </td>
-                                <td><h5 class="font-weight-bold mb-0">722</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">Mississippi</td>
-                                <td class="w-100 px-0">
-                                  <div class="progress progress-md mx-4">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 95%" aria-valuenow="95" aria-valuemin="0" aria-valuemax="100"></div>
-                                  </div>
-                                </td>
-                                <td><h5 class="font-weight-bold mb-0">173</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">California</td>
-                                <td class="w-100 px-0">
-                                  <div class="progress progress-md mx-4">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 60%" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100"></div>
-                                  </div>
-                                </td>
-                                <td><h5 class="font-weight-bold mb-0">945</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">Maryland</td>
-                                <td class="w-100 px-0">
-                                  <div class="progress progress-md mx-4">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 40%" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100"></div>
-                                  </div>
-                                </td>
-                                <td><h5 class="font-weight-bold mb-0">553</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">Alaska</td>
-                                <td class="w-100 px-0">
-                                  <div class="progress progress-md mx-4">
-                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 75%" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
-                                  </div>
-                                </td>
-                                <td><h5 class="font-weight-bold mb-0">912</h5></td>
-                              </tr>
-                            </table>
+                        <div class="col-12 mb-3 mb-md-0 mt-3 mt-md-0 grid-margin stretch-card">
+                        <div class="card" style="border: 0px !important;box-shadow: none !important;">
+                          <div class="card-body">
+                            {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                    <li class="text-danger">{{ message }}</li>
+                                {% else %}
+                                    <li class="text-success">{{ message }}</li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+                            {% if confirm_change_email %}
+                            <div class="row">
+                              <div class="col-12 mb-3 mb-md-0 mt-3 mt-md-0 grid-margin stretch-card">
+                                <div class="card" style="border: 0px !important;box-shadow: none !important;">
+                                   <div class="card-body">
+                                    <p class="text-muted"><span class="text-danger" style="text-decoration: underline;">ATTENTION:</span> vous avez demander a modifier votre adresse email, vous serez deconnecter et un code sera envoyer a votre
+                                      nouvelle adresse email ( <span class="text-info">{{email}}</span> )....notez que si vous inserer un email invalide vous ne pourrez plus jamais 
+                                      acceder a votre compte sans inserer le code envoyer sur cette nouvelle adresse email. Donc soyez prudent,
+                                      et ne clicker sur confirmer que si vous etes sur de ce que vous faite.
+                                    </p>
+                                   
+                                    <a href="{% url 'change_email' %}" type="submit" class="btn btn-success btn-icon-text">
+                                      <i class="ti-alert btn-icon-prepend"></i>                                                    
+                                      CONTINUER
+                                    </a>
+                                  
+                                   </div>
+                                </div>
+                              </div>
+                            </div>
+                            {% endif %}
+                              <ul class="d-flex flex-column todo-list todo-list-custom">
+                                <form method="post" action="">
+                                    {% csrf_token %}
+                                 <li style="list-style:none !important;">
+                                    <div class="form-group">
+                                    <label>IDENTIFIANT(*No modifiable)</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend bg-transparent">
+                                        <span class="input-group-text bg-transparent border-right-0">
+                                            <i class="ti-lock text-primary"></i>
+                                        </span>
+                                        </div>
+                                        <input type="text" value="{{user.username}}" name="identifiant" class="form-control form-control-lg border-left-0" id="exampleInputPassword" readonly>                        
+                                    </div>
+                                    </div>
+                                    <div class="form-group">
+                                    <label>NOM :</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend bg-transparent">
+                                        <span class="input-group-text bg-transparent border-right-0">
+                                            <i class="ti-user text-primary"></i>
+                                        </span>
+                                        </div>
+                                        <input type="text" value="{{user.first_name}}" name="first_name" class="form-control form-control-lg border-left-0" id="exampleInputPassword" required>                        
+                                    </div>
+                                    </div>
+                                    <div class="form-group">
+                                    <label>PRENOM :</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend bg-transparent">
+                                        <span class="input-group-text bg-transparent border-right-0">
+                                            <i class="ti-user text-primary"></i>
+                                        </span>
+                                        </div>
+                                        <input type="text" value="{{user.last_name}}" name="last_name" class="form-control form-control-lg border-left-0" id="last_name" required>                        
+                                    </div>
+                                    </div>
+                                    <div class="form-group">
+                                    <label>EMAIL ( *Si modifier un code de verification sera envoyer au nouvelle adresse email )</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend bg-transparent">
+                                        <span class="input-group-text bg-transparent border-right-0">
+                                            <i class="ti-email text-primary"></i>
+                                        </span>
+                                        </div>
+                                        <input type="email" value="{{user.email}}" name="email" class="form-control form-control-lg border-left-0" id="email" required>                        
+                                    </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <button type="submit" class="btn btn-info">ENREGISTRER</button>
+                                    </div>
+                                </li>   
+                                </form>
+                                
+                              </ul>
+                            
+                            
                           </div>
                         </div>
                       </div>
+                      </div>
                     </div>
+                  
                   </div>
                 </div>
               </div>
@@ -292,12 +328,7 @@
         </div>
         <!-- content-wrapper ends -->
         <!-- partial:partials/_footer.html -->
-        <footer class="footer">
-          <div class="d-sm-flex justify-content-center justify-content-sm-between">
-            <span class="text-muted text-center text-sm-left d-block d-sm-inline-block">Copyright © <a href="https://www.bootstrapdash.com/" target="_blank">bootstrapdash.com </a>2021</span>
-            <span class="float-none float-sm-right d-block mt-1 mt-sm-0 text-center">Only the best <a href="https://www.bootstrapdash.com/" target="_blank"> Bootstrap dashboard </a> templates</span>
-          </div>
-        </footer>
+        {% include 'main_tmpl/partials/_footer.html' %}
         <!-- partial -->
       </div>
       <!-- main-panel ends -->
@@ -322,6 +353,88 @@
   <!-- Custom js for this page-->
   <script src="{% static 'main_tmpl/js/dashboard.js' %}"></script>
   <!-- End custom js for this page-->
+   <script src="{% static 'main_tmpl/js/scripts.js' %}?v=1"></script>
+   <script>
+    (function($) {
+  'use strict';
+  $(function() {
+    if ($("#user-stats-chart").length) {
+      var areaData = {
+        labels: ["Jan", "Feb", "Mar"],
+        datasets: [{
+            data: [100, 50, 50],
+            backgroundColor: [
+              "#71c016", "#8caaff", "#248afd",
+            ],
+            borderColor: "rgba(0,0,0,0)"
+          }
+        ]
+      };
+      var areaOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        segmentShowStroke: false,
+        cutoutPercentage: 78,
+        elements: {
+          arc: {
+              borderWidth: 4
+          }
+        },      
+        legend: {
+          display: false
+        },
+        tooltips: {
+          enabled: true
+        },
+        legendCallback: function(chart) { 
+          var text = [];
+          text.push('<div class="report-chart">');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[0] + '"></div><p class="mb-0">Tot. document(s)</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[1] + '"></div><p class="mb-0">Tot. livres</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[2] + '"></div><p class="mb-0">Tot. salles de classe</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+          text.push('</div>');
+          return text.join("");
+        },
+      }
+      var northAmericaChartPlugins = {
+        beforeDraw: function(chart) {
+          var width = chart.chart.width,
+              height = chart.chart.height,
+              ctx = chart.chart.ctx;
+      
+          ctx.restore();
+          var fontSize = 3.125;
+          ctx.font = "600 " + fontSize + "em sans-serif";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#000";
+      
+          var text = "0",
+              textX = Math.round((width - ctx.measureText(text).width) / 2),
+              textY = height / 2;
+      
+          ctx.fillText(text, textX, textY);
+          ctx.save();
+        }
+      }
+      var northAmericaChartCanvas = $("#user-stats-chart").get(0).getContext("2d");
+      var northAmericaChart = new Chart(northAmericaChartCanvas, {
+        type: 'doughnut',
+        data: areaData,
+        options: areaOptions,
+        plugins: northAmericaChartPlugins
+      });
+      document.getElementById('user-stats-chart-legend').innerHTML = northAmericaChart.generateLegend();
+    }
+
+  });
+})(jQuery);
+   </script>
 </body>
 
 </html>

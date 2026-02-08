@@ -37,7 +37,7 @@
                       {% if message.tags == 'error' %}
                         <li class="text-danger">{{ message }}</li>
                       {% else %}
-                        <li>{{ message }}</li>
+                        <li class="text-success">{{ message }}</li>
                       {% endif %}
                     {% endfor %}
                 </ul>
@@ -57,7 +57,7 @@
                       Voir password
                     </label>
                   </div>
-                  <a href="{% url 'forgot_password' %}" class="auth-link text-black">Password oublie ?</a>
+                  <a href="{% url 'forgot_password' %}" class="auth-link text-black">Retrouver mon compte ?</a>
                 </div>
                 <div class="mt-3">
                   <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn">CONNECTER</button>

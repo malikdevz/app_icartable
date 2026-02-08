@@ -1,6 +1,20 @@
 from django.contrib import admin
 from django.urls import path
-from .views import  UserLogin, UserReg,UserResetPassword,ResetPassCodeCheck,NewPassword,VerifyAccount,Dashboard, logout_view,send_code
+from .views import  (
+    UserLogin, 
+    UserReg,
+    UserResetPassword,
+    ResetPassCodeCheck,
+    NewPassword,
+    VerifyAccount,
+    Dashboard, 
+    logout_view,
+    send_code,
+    UserAccount,
+    EditAccount,
+    ChangeEmail,
+    UserList
+)
 
 urlpatterns = [
     path('',  UserLogin.as_view(), name="user_login"),
@@ -11,5 +25,9 @@ urlpatterns = [
     path('verify_code',VerifyAccount.as_view(),name="verify_code"),
     path('dashboard', Dashboard.as_view(), name="dashboard"),
     path('user_logout',logout_view,name="user_logout"),
-    path('send_code',send_code,name="send_code")
+    path('send_code',send_code,name="send_code"),
+    path('user_account', UserAccount.as_view(), name="user_account"),
+    path('edit_account', EditAccount.as_view(),name="edit_account"),
+    path('change_email', ChangeEmail.as_view(), name="change_email"),
+    path('users_list',UserList.as_view(), name="users_list")
 ]

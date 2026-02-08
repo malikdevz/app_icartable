@@ -1,0 +1,55 @@
+<div class="row">
+            <div class="col-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <p class="card-title mb-0">Liste d'utilisateurs</p>
+                  <div class="table-responsive">
+                    <table class="table table-hover">
+                      <thead>
+                        <tr>
+                          <th>N<sup>o</sup></th>
+                          <th>DATE INSCRIPTION</th>
+                          <th>IDENTIFIANT</th>
+                          <th>NOM</th>
+                          <th>PRENOM</th>
+                          <th>EMAIL</th>
+                          <th>TYPE ACC</th>
+                          <th>STATUT</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for user in users %}
+                        <tr>
+                          <td>{{forloop.counter}}</td>
+                          <td>{{user.date_joined}}</td>
+                          <td>{{user.username}}</td>
+                          <td>{{user.first_name}}</td>
+                          <td>{{user.last_name}}</td>
+                          <td>{{user.email}}</td>
+                          {% if user.is_staff %}
+                            {% if user.is_superuser %}
+                              <td>Admin</td>
+                            {% else %}
+                              <td>Professeur</td>
+                            {% endif %}
+                          {% else %}
+                          <td>Eleve</td>
+                          {% endif %}
+
+                          {% if user.is_active %}
+                          <td>Active</td>
+                          {% else %}
+                          <td>Inactive</td>
+                          {% endif %}
+                        </tr>
+                        {% endfor %}
+                        
+                       
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>

@@ -53,7 +53,7 @@ def check_password(password):
 class UserLogin(View):
 
     def get(self, request):
-        if request.user.is_authenticated:
+        if request.user.is_authenticated and request.user.is_active:
             return redirect("dashboard")
         return render(request, 'main_tmpl/pages/login.html')
     
@@ -61,8 +61,8 @@ class UserLogin(View):
         data=request.POST.dict()
         if data['identifiant'] and User.objects.filter(username=data['identifiant']).exists():
             user=User.objects.get(username=data['identifiant'])
+            request.session['user_id']=user.username
             if not user.is_active:
-                request.session['user_id']=user.username
                 send_verification_code(user, title="ICARTABLE! Code de verification") 
                 return redirect("verify_code")
 
@@ -249,7 +249,92 @@ class Dashboard(LoginRequiredMixin, View):
         data={
             "user":request.user
         }
+        if not data['user'].is_active:
+            return redirect("user_logout")
+        request.session['user_id']=data['user'].username
         return render(request, "main_tmpl/dashboard.html",data)
+
+
+class UserAccount(LoginRequiredMixin, View):
+
+    def get(self,request):
+        data={
+            "user":request.user
+        }
+        return render(request, 'main_tmpl/pages/user_account.html', data)
+
+class EditAccount(LoginRequiredMixin, View):
+
+    def get(self, request):
+        return render(request, 'main_tmpl/pages/edit_account.html')
+    
+
+    def post(self, request):
+        fdbck=False
+        data={
+            "first_name":request.POST.dict().get("first_name",None),
+            "last_name":request.POST.dict().get("last_name", None),
+            "identifiant":request.POST.dict().get("identifiant", None),
+            "email": request.POST.dict().get("email", None)
+        }
+        
+        try:
+            user=User.objects.get(username=data['identifiant'])
+            data['user']=user
+
+            if data['email'] and user.email != data['email']:
+                if email_valide(data['email']):
+                    if User.objects.filter(email=data['email']).exists():
+                        messages.error(request, "Cette adresse email est deja associer a un compte")
+                        return render(request, 'main_tmpl/pages/edit_account.html',data)
+                    else:
+                        #change email warning
+                        data['confirm_change_email']=True
+                        request.session['email']=data['email']
+                else:
+                    messages.error(request, "Veuillez inserer une adresse email valide svp!")
+                    return render(request, 'main_tmpl/pages/edit_account.html',data)
+
+            if data['first_name'] and user.first_name != data['first_name']:
+                user.first_name=data['first_name']
+                user.save()
+                messages.success(request, "Nom modifier avec success ")
+            if data['last_name'] and data['last_name'] != user.last_name:
+                user.last_name=data['last_name']
+                user.save() 
+                messages.success(request, "Prenom modifier avec success ")
+        except Exception as exc:
+            messages.error(request, "Cette utilisateur n'existe plus!")
+        return render(request, 'main_tmpl/pages/edit_account.html',data)
+
+class ChangeEmail(LoginRequiredMixin, View):
+
+    def get(self, request):
+        try:
+            data={
+                "user":User.objects.get(username=request.session['user_id'])
+            }
+        except:
+            messages.error(request, "Ops! desolee quelque chose a mal tournee reessayer!")
+            return redirect("edit_account")
+        if "email" in request.session.keys():
+            data['user'].email=request.session['email']
+            data['user'].is_active=False
+            data['user'].save()
+            send_verification_code(data['user'], title="ICARTABLE, Code de verification de votre compte")
+        return redirect("verify_code")
+
+#-------ADMIN--------
+class UserList(LoginRequiredMixin, View):
+
+    def get(self, request):
+        data={
+            "users":User.objects.all()
+        }
+        return render(request, 'main_tmpl/pages/users_list.html',data)
+
+#-----------------------
+
 
 
 def send_code(request):
