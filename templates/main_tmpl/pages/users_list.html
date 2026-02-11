@@ -211,7 +211,7 @@
                   <div class="row">
                     <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-center">
                       <div class="ml-xl-4">
-                        <h1>{{users.count}}</h1>
+                        <h1>{{nbr_users}}</h1>
                         <h3 class="font-weight-light mb-xl-4">Utilisateurs</h3>
                         <p class="text-muted mb-2 mb-xl-0">Nombre total d'utilisateurs inscrit</p>
                       </div>  
@@ -298,7 +298,7 @@
       var areaData = {
         labels: ["Jan", "Feb", "Mar"],
         datasets: [{
-            data: [100, 50, 50],
+            data: [{{nbr_male}}, {{nbr_female}}, {{other_gender}}],
             backgroundColor: [
               "#71c016", "#8caaff", "#248afd",
             ],
@@ -326,13 +326,13 @@
           var text = [];
           text.push('<div class="report-chart">');
             text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[0] + '"></div><p class="mb-0">Hommes</p></div>');
-            text.push('<p class="mb-0">0</p>');
+            text.push('<p class="mb-0">{{nbr_male}}</p>');
             text.push('</div>');
             text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[1] + '"></div><p class="mb-0">Femmes</p></div>');
-            text.push('<p class="mb-0">0</p>');
+            text.push('<p class="mb-0">{{nbr_female}}</p>');
             text.push('</div>');
             text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[2] + '"></div><p class="mb-0">N/A</p></div>');
-            text.push('<p class="mb-0">0</p>');
+            text.push('<p class="mb-0">{{other_gender}}</p>');
             text.push('</div>');
           text.push('</div>');
           return text.join("");
@@ -350,7 +350,7 @@
           ctx.textBaseline = "middle";
           ctx.fillStyle = "#000";
       
-          var text = "0",
+          var text = "{{nbr_users}}",
               textX = Math.round((width - ctx.measureText(text).width) / 2),
               textY = height / 2;
       

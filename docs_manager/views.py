@@ -13,6 +13,8 @@ from django.utils import timezone
 from django.conf import settings
 from django.contrib.auth import logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils import timezone
+from django.core.paginator import Paginator
 
 def send_verification_code(user, title="ICARTABLE!"):
     # Générer un code à 6 chiffres
@@ -328,9 +330,60 @@ class ChangeEmail(LoginRequiredMixin, View):
 class UserList(LoginRequiredMixin, View):
 
     def get(self, request):
+        nbr_per_page=10
+        
         data={
-            "users":User.objects.all()
+            "users":User.objects.all(),
+            "nbr_page":int(User.objects.all().count()/nbr_per_page),
+            "current_p":int(request.GET.dict().get('page') if 'page' in request.GET.dict().keys() else 1),
+            "current_url":request.build_absolute_uri(),
+            "nbr_users":User.objects.count(),
+            "nbr_male":User.objects.count(),
+            "nbr_female":1,
+            "other_gender":1
         }
+        
+
+        if "srch_wd" in request.GET.dict().keys():
+            data["srch_wd"]=request.GET.dict().get("srch_wd")
+            data['is_srch']=True
+            data['users']=[]
+            for user in User.objects.all():
+                if user.username == data["srch_wd"] or user.first_name == data["srch_wd"] or user.last_name == data["srch_wd"] or user.email == data["srch_wd"]:
+                    data['users'].append(user)
+
+        if "filter" in request.GET.dict().keys():
+            data['filter_wd']=request.GET.dict().get("filter")
+            data['is_filter']=True
+            data['users']=[]
+            for user in User.objects.all():
+                tot_days_since_reg=(timezone.now() - user.date_joined).days
+                if data['filter_wd'] == "teacher" and user.is_staff and not user.is_superuser:
+                    data['users'].append(user)
+                elif data['filter_wd'] == "student" and not user.is_superuser and not user.is_staff:
+                    data['users'].append(user)
+                elif data['filter_wd'] == "reg_today" and tot_days_since_reg <= 1 :
+                    data['users'].append(user)
+                elif data['filter_wd'] == "reg_this_week" and tot_days_since_reg <= 7 :
+                    data['users'].append(user)
+                elif data['filter_wd'] == "reg_this_mth" and tot_days_since_reg <= 31 :
+                    data['users'].append(user)
+            data['fltr_wd']=data['filter_wd']
+            if data['filter_wd'] == "teacher":
+                data['filter_wd']="Professeur"
+            elif data['filter_wd'] == "student":
+                data['filter_wd']="Eleve"
+            elif data['filter_wd'] == "reg_today":
+                data['filter_wd']="Inscrit aujourdhui"
+            elif data['filter_wd'] == "reg_this_week":
+                data['filter_wd']="Inscrit cette semaine"
+            elif data['filter_wd'] == "reg_this_mth":
+                data['filter_wd']="Inscrit ce mois-ci"
+
+            #paginer la liste de users
+        paginator=Paginator(data['users'], nbr_per_page)
+        data['users']=paginator.get_page(data['current_p'])
+        
         return render(request, 'main_tmpl/pages/users_list.html',data)
 
 #-----------------------

@@ -1,36 +1,84 @@
 <div class="row">
           <div class="col-12 col-md-8">
               <div class="form-group">
-                      <label for="inputSearch">Rechercher:</label>             
+                      <label for="inputSearch">Rechercher: </label> 
+                      <form method="get" action="">            
                     <div class="input-group">
                         
-                          <input type="text" value="" name="identifiant" placeholder="Search identifiant, name, email....." class="form-control form-control-lg border-left-0" id="inputSearch" required>                        
+                          <input type="text" value="" name="srch_wd" placeholder="Search identifiant, name, email....." class="form-control form-control-lg border-left-0" id="inputSearch" required>                        
                         <div class="input-group-prepend bg-transparent">
-                              <a href="" class="input-group-text bg-primary border-right-0">
+                              <button type="submit" class="input-group-text bg-primary border-right-0">
                                   <i class="ti-search text-white"></i>
-                              </a>
+                              </button>
                           </div>
                         </div>
+                        </form>
               </div>
             </div>
+            
 
             <div class="col-12 col-md-4">
+              <form method="get" action="">
               <div class="form-group">
-                  <label>Filtres :</label>
-                  <select class="form-control form-control-lg" id="exampleFormControlSelect2" name="type_acc" required>
-                    <option value="staff">Professeur</option>
+               <label>Filtres :</label>
+              <div class="input-group">
+                 
+                  <select class="form-control form-control-lg text-black bg-white" id="" name="filter" required>
+                    <option >Choisir....</option>
+                    <option value="teacher" {% if fltr_wd == 'teacher' %}selected{% endif %}>Professeur</option>
+                    <option value="student" {% if fltr_wd == 'student' %}selected{% endif %}>Eleve</option>
+                    <option value="admin" {% if fltr_wd == 'admin' %}selected{% endif %}>Admin</option>
+                    <option value="active" {% if fltr_wd == 'active' %}selected{% endif %}>Active</option>
+                    <option value="inactive" {% if fltr_wd == 'inactive' %}selected{% endif %}>Inactive</option>
+                    <option value="reg_today" {% if fltr_wd == 'reg_today' %}selected{% endif %}>Inscrit aujourdhui</option>
+                    <option value="reg_this_week" {% if fltr_wd == 'reg_this_week' %}selected{% endif %}>Inscrit cette semaine</option>
+                    <option value="reg_this_mth" {% if fltr_wd == 'reg_this_mth' %}selected{% endif %}>Inscrit ce mois-ci</option>
                   </select>
+                   <div class="input-group-prepend bg-transparent">
+                              <button type="submit" class="input-group-text bg-primary border-right-0">
+                                  <i class="ti-exchange-vertical text-white"></i>
+                              </button>
+                          </div>
                 </div>
+                </div>
+              </form>
             </div>
+            {% if is_srch %}
+            <div class="col-12">
+              <p>Resultat pour : <span style="font-weight: bold;">{{srch_wd}}</span>
+
+                
+                <button type="button" class="btn btn-sm btn-icon" style="font-weight: bold;font-size: 12px;">
+                        {{users|length}}
+                      </button>
+                      utilisateur(s)
+               <a href="{% url 'users_list' %}" class="btn btn-primary btn-rounded btn-fw">Tout les utilisateurs</a>
+              </p>
+            </div>
+            {% endif %}
+
+            {% if is_filter %}
+            <div class="col-12">
+              <p>Filtrer par : <span style="font-weight: bold;">{{filter_wd}}</span>
+
+                
+                <button type="button" class="btn btn-sm btn-icon" style="font-weight: bold;font-size: 12px;">
+                        {{users|length}}
+                      </button>
+                      utilisateur(s)
+               <a href="{% url 'users_list' %}" class="btn btn-primary btn-rounded btn-fw">Tout les utilisateurs</a>
+              </p>
+            </div>
+            {% endif %}
             <div class="col-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
                   <p class="card-title mb-0">Liste d'utilisateurs</p>
-                  <div class="table-responsive">
+                  <div class="table-responsive" style="min-height: 50vh;">
                     <table class="table table-hover">
                       <thead>
                         <tr>
-                          <th>N<sup>o</sup></th>
+                          
                           <th>DATE INSCRIPTION</th>
                           <th>IDENTIFIANT</th>
                           <th>NOM</th>
@@ -38,12 +86,13 @@
                           <th>EMAIL</th>
                           <th>TYPE ACC</th>
                           <th>STATUT</th>
+                          <th>ACTION</th>
                         </tr>
                       </thead>
                       <tbody>
                         {% for user in users %}
                         <tr>
-                          <td>{{forloop.counter}}</td>
+                          
                           <td>{{user.date_joined}}</td>
                           <td>{{user.username}}</td>
                           <td>{{user.first_name}}</td>
@@ -64,6 +113,41 @@
                           {% else %}
                           <td>Inactive</td>
                           {% endif %}
+                          
+                          <td class="dropdown">
+                          
+                            <button type="button" class="btn btn-rounded btn-icon dropdown-toggle d-flex justify-content-center align-items-center" id="messageDropdown" href="#" data-bs-toggle="dropdown">
+                                <i class="ti-settings mx-0"></i>
+                            </button>
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="messageDropdown">
+                              <p class="mb-0 font-weight-normal float-left dropdown-header"></p>
+                                <a class="dropdown-item">
+                                  <div class="item-content flex-grow">
+                                    <h6 class="ellipsis font-weight-normal"><i class="ti-pencil"></i> Modifier
+                                    </h6>
+                                  </div>
+                                </a>
+                                <a class="dropdown-item">
+                                  <div class="item-content flex-grow">
+                                    <h6 class="ellipsis font-weight-normal"><i class="ti-bar-chart-alt"></i> Voir stats
+                                    </h6>
+                                  </div>
+                                </a>
+                                <a class="dropdown-item">
+                                  <div class="item-content flex-grow">
+                                    <h6 class="ellipsis font-weight-normal"><i class="ti-trash"></i> Supprimer
+                                    </h6>
+                                  </div>
+                                </a>
+                                <a class="dropdown-item">
+                                  <div class="item-content flex-grow">
+                                    <h6 class="ellipsis font-weight-normal"><i class="ti-face-sad"></i> Desactiver/Banir
+                                    </h6>
+                                  </div>
+                                </a>
+                                  
+                                </div>
+                          </td>
                         </tr>
                         {% endfor %}
                         
@@ -78,20 +162,42 @@
                     <div class="col-12 text-center">
                           <nav aria-label="Page navigation example">
                             <ul class="pagination">
-                              <li class="page-item">
-                                <a class="page-link" href="#" aria-label="Previous">
-                                  <span aria-hidden="true">&laquo;</span>
+                              {% if users.has_previous %}
+                               <li class="page-item">
+                                <a class="page-link" href="{% url 'users_list' %}?page={{ users.previous_page_number }}" aria-label="Previous">
+                                  <span aria-hidden="true">Page precedente &laquo;</span>
                                 </a>
                               </li>
-                              <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                              <li class="page-item"><a class="page-link" href="#">2</a></li>
-                              <li class="page-item"><a class="page-link" href="#">3</a></li>
+                              {% else %}
+                              <li class="page-item">
+                                <a class="page-link text-muted" aria-label="Previous">
+                                  <span aria-hidden="true">Page precedente &laquo;</span>
+                                </a>
+                              </li>
+                              {% endif %}
+
+                              <li class="page-item">
+                                <a class="page-link text-bold">
+                                {{users.number}}/{{users.paginator.num_pages}}
+                                </a>
+                              </li>
+                              
+                              {% if users.has_next %}
                               <li class="page-item">
 
-                                <a class="page-link" href="#" aria-label="Next">
-                                  <span aria-hidden="true">&raquo;</span>
+                                <a class="page-link" href="{% url 'users_list' %}?page={{ users.next_page_number }}" aria-label="Next">
+                                  <span aria-hidden="true">&raquo; Page suivante</span>
                                 </a>
                               </li>
+                              
+                              {% else %}
+                              <li class="page-item disable">
+
+                                <a class="page-link text-muted" aria-label="Next">
+                                  <span aria-hidden="true">&raquo; Page suivante</span>
+                                </a>
+                              </li>
+                              {% endif %}
                             </ul>
                           </nav>
                     </div>
