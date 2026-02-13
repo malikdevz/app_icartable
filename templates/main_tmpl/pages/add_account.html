@@ -209,17 +209,9 @@
             <div class="col-md-12 grid-margin stretch-card">
               <div class="card position-relative">
                 <div class="card-body">
-                  <p class="card-title">CREATION D"UN COMPTE</p>
+                  <p class="card-title">CREATION D'UN COMPTE</p>
                   <div class="row">
-                    <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-center">
-                      <div class="ml-xl-4">
-                        <img src="{% static 'main_tmpl/images/faces/face2.jpg' %}" class="img col-12"/>
-                        <button type="button" class="btn btn-outline-light btn-icon-text my-2">
-                          <i class="ti-upload btn-icon-prepend"></i>                                                    
-                          Changer photo
-                        </button>
-                      </div>  
-                    </div>
+                    
                     <div class="col-md-12 col-xl-9">
                       <div class="row">
                         <div class="col-12 mb-3 mb-md-0 mt-3 mt-md-0 grid-margin stretch-card">
@@ -236,79 +228,86 @@
                                 {% endfor %}
                             </ul>
                             {% endif %}
-                            {% if confirm_change_email %}
-                            <div class="row">
-                              <div class="col-12 mb-3 mb-md-0 mt-3 mt-md-0 grid-margin stretch-card">
-                                <div class="card" style="border: 0px !important;box-shadow: none !important;">
-                                   <div class="card-body">
-                                    <p class="text-muted"><span class="text-danger" style="text-decoration: underline;">ATTENTION:</span> vous avez demander a modifier votre adresse email, vous serez deconnecter et un code sera envoyer a votre
-                                      nouvelle adresse email ( <span class="text-info">{{email}}</span> )....notez que si vous inserer un email invalide vous ne pourrez plus jamais 
-                                      acceder a votre compte sans inserer le code envoyer sur cette nouvelle adresse email. Donc soyez prudent,
-                                      et ne clicker sur confirmer que si vous etes sur de ce que vous faite.
-                                    </p>
-                                   
-                                    <a href="{% url 'change_email' %}" type="submit" class="btn btn-success btn-icon-text">
-                                      <i class="ti-alert btn-icon-prepend"></i>                                                    
-                                      CONTINUER
-                                    </a>
-                                  
-                                   </div>
-                                </div>
-                              </div>
-                            </div>
-                            {% endif %}
+                           
                               <ul class="d-flex flex-column todo-list todo-list-custom">
-                                <form method="post" action="">
+                                 <form class="pt-3" action="" method="post" >
                                     {% csrf_token %}
-                                 <li style="list-style:none !important;">
                                     <div class="form-group">
-                                    <label>IDENTIFIANT(*No modifiable)</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend bg-transparent">
-                                        <span class="input-group-text bg-transparent border-right-0">
-                                            <i class="ti-lock text-primary"></i>
-                                        </span>
-                                        </div>
-                                        <input type="text" value="{{user.username}}" name="identifiant" class="form-control form-control-lg border-left-0" id="exampleInputPassword" readonly>                        
-                                    </div>
-                                    </div>
-                                    <div class="form-group">
-                                    <label>NOM :</label>
+                                    <label>Nom</label>
                                     <div class="input-group">
                                         <div class="input-group-prepend bg-transparent">
                                         <span class="input-group-text bg-transparent border-right-0">
                                             <i class="ti-user text-primary"></i>
                                         </span>
                                         </div>
-                                        <input type="text" value="{{user.first_name}}" name="first_name" class="form-control form-control-lg border-left-0" id="exampleInputPassword" required>                        
+                                        <input type="text" value="{{first_name}}" name="first_name" class="form-control form-control-lg border-left-0" placeholder="Nom" required>
                                     </div>
                                     </div>
                                     <div class="form-group">
-                                    <label>PRENOM :</label>
+                                    <label>Prenom</label>
                                     <div class="input-group">
                                         <div class="input-group-prepend bg-transparent">
                                         <span class="input-group-text bg-transparent border-right-0">
                                             <i class="ti-user text-primary"></i>
                                         </span>
                                         </div>
-                                        <input type="text" value="{{user.last_name}}" name="last_name" class="form-control form-control-lg border-left-0" id="last_name" required>                        
+                                        <input type="text" value="{{last_name}}" name="last_name" class="form-control form-control-lg border-left-0" placeholder="Prenom" required>
                                     </div>
                                     </div>
                                     <div class="form-group">
-                                    <label>EMAIL ( *Si modifier un code de verification sera envoyer au nouvelle adresse email )</label>
+                                    <label>Email (pas obligatoire pour le compte eleve)</label>
                                     <div class="input-group">
                                         <div class="input-group-prepend bg-transparent">
                                         <span class="input-group-text bg-transparent border-right-0">
                                             <i class="ti-email text-primary"></i>
                                         </span>
                                         </div>
-                                        <input type="email" value="{{user.email}}" name="email" class="form-control form-control-lg border-left-0" id="email" required {%if email_field_readonly %}readonly{% endif%}>                        
+                                        <input type="email" value="{{email}}" name="email" class="form-control form-control-lg border-left-0" placeholder="Email">
                                     </div>
+                                    </div>
+                                <!--<div class="form-group">
+                                    <label>Country</label>
+                                    <select class="form-control form-control-lg" id="exampleFormControlSelect2">
+                                        <option>Country</option>
+                                        <option>United States of America</option>
+                                        <option>United Kingdom</option>
+                                        <option>India</option>
+                                        <option>Germany</option>
+                                        <option>Argentina</option>
+                                    </select>
+                                    </div>-->
+                                    <div class="form-group">
+                                    <label>Type de compte :</label>
+                                    <select style="background-color: white !important;color: black !important;" class="form-control form-control-lg" id="exampleFormControlSelect2" name="type_acc" required>
+                                        <option value="staff">Professeur</option>
+                                        <option value="student">Eleve</option>
+                                    </select>
                                     </div>
                                     <div class="form-group">
-                                        <button type="submit" class="btn btn-info">ENREGISTRER</button>
+                                    <label>Password par defaut(*l'utilisateur devra le changer et choisir un mot de passe plus approprie)</label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend bg-transparent">
+                                        <span class="input-group-text bg-transparent border-right-0">
+                                            <i class="ti-lock text-primary"></i>
+                                        </span>
+                                        </div>
+                                        <input type="text" value="12345678" name="password" class="form-control form-control-lg border-left-0" id="exampleInputPassword" placeholder="Password" readonly>                        
                                     </div>
-                                </li>   
+                                    </div>
+                                
+                                    
+                                    <div class="mb-4">
+                                    <div class="form-check">
+                                        <label class="form-check-label text-muted">
+                                        <input type="checkbox" class="form-check-input" required>
+                                        J'accepte tout les termes et conditions d'utilisation
+                                        </label>
+                                    </div>
+                                    </div>
+                                    <div class="mt-3">
+                                    <button type="submit" class="btn btn-block btn-primary btn-lg font-weight-medium auth-form-btn" href="../../index.html">CREER UN COMPTE</button>
+                                    </div>
+                                    
                                 </form>
                                 
                               </ul>

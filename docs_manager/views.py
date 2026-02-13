@@ -485,6 +485,21 @@ class AddAccount(LoginRequiredMixin,View):
     def get(self, request):
         data={}
         return render(request, 'main_tmpl/pages/add_account.html',data)
+    
+    def post(self,request):
+        data={
+            "first_name":request.POST.dict().get("first_name",None),
+            "last_name":request.POST.dict().get("last_name",None),
+            "email":request.POST.dict().get("email",None),
+            "type_acc":request.POST.dict().get("type_acc",None),
+            "password":"12345678"
+        }
+        user_id=userid_code_generator()
+        while User.objects.filter(username=user_id).exists():
+            user_id=userid_code_generator()
+        user=User.objects.create_user(username=user_id, first_name=data['first_name'], last_name=data['last_name'], email=data['email'],password=data['password'])
+        messages.success(request, f"Compte creer avec success, IDENTIFIANT :{user_id}")
+        return render(request, 'main_tmpl/pages/add_account.html',data)
 def send_code(request):
     next_url=request.GET.dict().get("next")
     if "user_id" in request.session.keys():
