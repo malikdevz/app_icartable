@@ -13,3 +13,11 @@ class VerificationCode(models.Model):
     
     def __str__(self):
         return f"{self.user.username}, {self.user.email}, {self.code}"
+
+
+class BannedUser(models.Model):
+    date_add=models.DateTimeField(auto_now_add=True)
+    user_id=models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.user_id

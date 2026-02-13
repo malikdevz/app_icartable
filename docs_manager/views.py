@@ -55,14 +55,20 @@ def check_password(password):
 class UserLogin(View):
 
     def get(self, request):
-        if request.user.is_authenticated and request.user.is_active:
-            return redirect("dashboard")
+        if request.user.is_authenticated:
+            if request.user.is_active:
+                return redirect("dashboard")
+            elif BannedUser.objects.filter(user_id=request.user.username).exists():
+                messages.error(request, "Desolee! vous avez etait bani par l'administrateur")
         return render(request, 'main_tmpl/pages/login.html')
     
     def post(self, request):
         data=request.POST.dict()
         if data['identifiant'] and User.objects.filter(username=data['identifiant']).exists():
             user=User.objects.get(username=data['identifiant'])
+            if not user.is_active and  BannedUser.objects.filter(user_id=user.username).exists():
+                messages.error(request, "Desolee! vous avez etait bani par l'administrateur, veuillez contacter l'equipe de support pour tout assistance!")
+                return redirect("user_login")
             request.session['user_id']=user.username
             if not user.is_active:
                 send_verification_code(user, title="ICARTABLE! Code de verification") 
@@ -263,12 +269,29 @@ class UserAccount(LoginRequiredMixin, View):
         data={
             "user":request.user
         }
+        if request.GET.dict().get("user_id",None):
+            try:
+                data['user']=User.objects.get(username=request.GET.dict().get("user_id",None))
+            except:
+                data['user']=request.user
         return render(request, 'main_tmpl/pages/user_account.html', data)
 
 class EditAccount(LoginRequiredMixin, View):
 
     def get(self, request):
-        return render(request, 'main_tmpl/pages/edit_account.html')
+        data={}
+        if not request.user.is_superuser:
+            data['user']=request.user
+        else:
+            if request.GET.dict().get("user_id",None):
+                try:
+                    data['user']=User.objects.get(username=request.GET.dict().get("user_id",None))
+                except:
+                    messages.error(request,"Cette utilisateur n'existe pas/plus!")
+            else:
+                data['user']=request.user
+        data["email_field_readonly"]=True if request.user.is_superuser and data['user'] != request.user else False
+        return render(request, 'main_tmpl/pages/edit_account.html',data)
     
 
     def post(self, request):
@@ -283,6 +306,12 @@ class EditAccount(LoginRequiredMixin, View):
         try:
             user=User.objects.get(username=data['identifiant'])
             data['user']=user
+            data["email_field_readonly"]=True if request.user != user and request.user.is_superuser else False
+
+            if request.user != user and not request.user.is_superuser:
+                messages.error(request, "Vous n'avez pas l'autorisation d'effectuer cette operation!")
+                return render(request, 'main_tmpl/pages/edit_account.html',data)
+            
 
             if data['email'] and user.email != data['email']:
                 if email_valide(data['email']):
@@ -309,6 +338,24 @@ class EditAccount(LoginRequiredMixin, View):
             messages.error(request, "Cette utilisateur n'existe plus!")
         return render(request, 'main_tmpl/pages/edit_account.html',data)
 
+class UserStats(LoginRequiredMixin,View):
+
+    def get(self,request):
+        data={
+            "user":request.user
+        }
+        if request.GET.dict().get("user_id",None):
+            try:
+                data['user']=User.objects.get(username=request.GET.dict().get("user_id"))
+            except:
+                pass
+        data['nbr_students']=35
+        data['nbr_books']=2
+        data['nbr_docs']=10
+        data['nbr_classes']=0
+        
+        return render(request, 'main_tmpl/pages/stats_account.html', data)
+
 class ChangeEmail(LoginRequiredMixin, View):
 
     def get(self, request):
@@ -333,7 +380,7 @@ class UserList(LoginRequiredMixin, View):
         nbr_per_page=10
         
         data={
-            "users":User.objects.all(),
+            "users":[user for user in User.objects.all() if user != request.user],
             "nbr_page":int(User.objects.all().count()/nbr_per_page),
             "current_p":int(request.GET.dict().get('page') if 'page' in request.GET.dict().keys() else 1),
             "current_url":request.build_absolute_uri(),
@@ -357,6 +404,8 @@ class UserList(LoginRequiredMixin, View):
             data['is_filter']=True
             data['users']=[]
             for user in User.objects.all():
+                if user == request.user:
+                    continue
                 tot_days_since_reg=(timezone.now() - user.date_joined).days
                 if data['filter_wd'] == "teacher" and user.is_staff and not user.is_superuser:
                     data['users'].append(user)
@@ -368,6 +417,13 @@ class UserList(LoginRequiredMixin, View):
                     data['users'].append(user)
                 elif data['filter_wd'] == "reg_this_mth" and tot_days_since_reg <= 31 :
                     data['users'].append(user)
+                elif data['filter_wd'] == "admin" and user.is_superuser :
+                    data['users'].append(user)
+                elif data['filter_wd'] == "active" and user.is_active :
+                    data['users'].append(user)
+                elif data['filter_wd'] == "inactive" and not user.is_active :
+                    data['users'].append(user)
+
             data['fltr_wd']=data['filter_wd']
             if data['filter_wd'] == "teacher":
                 data['filter_wd']="Professeur"
@@ -383,13 +439,52 @@ class UserList(LoginRequiredMixin, View):
             #paginer la liste de users
         paginator=Paginator(data['users'], nbr_per_page)
         data['users']=paginator.get_page(data['current_p'])
-        
+
+        data['del_user_id']=request.GET.dict().get('del_user_id', None)
+        if data['del_user_id'] and User.objects.filter(username=data['del_user_id']).exists():
+            data['del_user']=User.objects.get(username=data['del_user_id'])
+            data['ask_for_delete']=True if "action" in request.GET.dict().keys() and request.GET.dict().get("action") == "delete"  else False
+            data['ban_user']=True if "action" in request.GET.dict().keys() and request.GET.dict().get("action") == "banir"  else False
+            data['unban_user']=True if "action" in request.GET.dict().keys() and request.GET.dict().get("action") == "unbanir"  else False
         return render(request, 'main_tmpl/pages/users_list.html',data)
 
 #-----------------------
 
+class DeleteUser(LoginRequiredMixin, View):
+    def get(self, request):
+        try:
+            User.objects.get(username=request.GET.dict().get("user_id", None)).delete()
+        except:
+            pass
+        return redirect("users_list")
 
+class BanUser(LoginRequiredMixin, View):
+    def get(self, request):
+        try:
+            user=User.objects.get(username=request.GET.dict().get("user_id", None))
+            user.is_active=False
+            user.save()
+            BannedUser(user_id=user.username).save()
+        except:
+            pass
+        return redirect("users_list")
 
+class UnBanUser(LoginRequiredMixin, View):
+    def get(self, request):
+        try:
+            user=User.objects.get(username=request.GET.dict().get("user_id", None))
+            user.is_active=True
+            user.save()
+            BannedUser.objects.filter(user_id=user.username).delete()
+        except:
+            pass
+        return redirect("users_list")
+
+class AddAccount(LoginRequiredMixin,View):
+
+    def get(self, request):
+        data={}
+        return render(request, 'main_tmpl/pages/add_account.html',data)
 def send_code(request):
     next_url=request.GET.dict().get("next")
     if "user_id" in request.session.keys():

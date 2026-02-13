@@ -1,4 +1,97 @@
 <div class="row">
+  {% if ask_for_delete %}
+  <script>
+    setTimeout(()=>{
+      Swal.fire({
+        title: "<strong>Voulez vous vraiment supprimer l'utilisateur {{del_user.username}}?</strong>",
+        icon: "info",
+        html: `
+          Cette action est irreversible, <b class="text-primary">{{del_user.first_name}} {{del_user.last_name}}</b> sera supprimer definitivement.
+        `,
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: `
+          <i class="fa fa-thumbs-up"></i> Supprimer
+        `,
+        confirmButtonAriaLabel: "Thumbs up, great!",
+        cancelButtonText: `
+          Annuler
+        `,
+        cancelButtonAriaLabel: "Thumbs down"
+      }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire("Supprimer Ok!", "", "success");
+            setTimeout(()=>{
+              window.location="{% url 'delete_user'%}?user_id={{del_user_id}}"
+            },1000)
+          }
+        });
+    },1000)
+   </script>
+  {% endif %}
+  {% if ban_user %}
+  <script>
+    setTimeout(()=>{
+      Swal.fire({
+        title: "<strong>Vous confirmer vouloir banir l'utilisateur {{del_user.username}}?</strong>",
+        icon: "info",
+        html: `
+          l'utilisateur <b class="text-primary">{{del_user.first_name}} {{del_user.last_name}}</b> ne pourra plus se connecter,n'aura plus access a son compte, vous pouvez retablir son access a tout moment.
+        `,
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: `
+          <i class="fa fa-thumbs-up"></i> Desactiver l'utilisateur
+        `,
+        confirmButtonAriaLabel: "Thumbs up, great!",
+        cancelButtonText: `
+          Annuler
+        `,
+        cancelButtonAriaLabel: "Thumbs down"
+      }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire("Utilisateur bani Ok!", "", "success");
+            setTimeout(()=>{
+              window.location="{% url 'ban_user'%}?user_id={{del_user_id}}"
+            },1000)
+          }
+        });
+    },1000)
+   </script>
+  {% endif %}
+  {% if unban_user %}
+  <script>
+    setTimeout(()=>{
+      Swal.fire({
+        title: "<strong>Vous confirmer vouloir retablir les access {{del_user.username}}?</strong>",
+        icon: "info",
+        html: `
+          l'utilisateur <b class="text-primary">{{del_user.first_name}} {{del_user.last_name}}</b> pourra a nouveau se connecte et utiliser son compte
+        `,
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: `
+          <i class="fa fa-thumbs-up"></i> Retablir l'access
+        `,
+        confirmButtonAriaLabel: "Thumbs up, great!",
+        cancelButtonText: `
+          Annuler
+        `,
+        cancelButtonAriaLabel: "Thumbs down"
+      }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire("Acces retabli Ok!", "", "success");
+            setTimeout(()=>{
+              window.location="{% url 'unban_user'%}?user_id={{del_user_id}}"
+            },1000)
+          }
+        });
+    },1000)
+   </script>
+  {% endif %}
           <div class="col-12 col-md-8">
               <div class="form-group">
                       <label for="inputSearch">Rechercher: </label> 
@@ -74,7 +167,7 @@
               <div class="card">
                 <div class="card-body">
                   <p class="card-title mb-0">Liste d'utilisateurs</p>
-                  <div class="table-responsive" style="min-height: 50vh;">
+                  <div class="table-responsive" style="min-height: 70vh;">
                     <table class="table table-hover">
                       <thead>
                         <tr>
@@ -94,7 +187,7 @@
                         <tr>
                           
                           <td>{{user.date_joined}}</td>
-                          <td>{{user.username}}</td>
+                          <td><a style="text-decoration: none;" href="{% url 'user_account' %}?user_id={{user.username}}"> {{user.username}}</a></td>
                           <td>{{user.first_name}}</td>
                           <td>{{user.last_name}}</td>
                           <td>{{user.email}}</td>
@@ -109,9 +202,9 @@
                           {% endif %}
 
                           {% if user.is_active %}
-                          <td>Active</td>
+                          <td class="text-success text-bold"><b>Active</b></td>
                           {% else %}
-                          <td>Inactive</td>
+                          <td class="text-danger text-bold"><b>Desactiver</b></td>
                           {% endif %}
                           
                           <td class="dropdown">
@@ -121,30 +214,39 @@
                             </button>
                             <div class="dropdown-menu dropdown-menu-right" aria-labelledby="messageDropdown">
                               <p class="mb-0 font-weight-normal float-left dropdown-header"></p>
-                                <a class="dropdown-item">
+                                <a class="dropdown-item" href="{% url 'edit_account' %}?user_id={{user.username}}">
                                   <div class="item-content flex-grow">
                                     <h6 class="ellipsis font-weight-normal"><i class="ti-pencil"></i> Modifier
                                     </h6>
                                   </div>
                                 </a>
-                                <a class="dropdown-item">
+                                <a class="dropdown-item" href="{% url 'stats_account' %}?user_id={{user.username}}">
                                   <div class="item-content flex-grow">
                                     <h6 class="ellipsis font-weight-normal"><i class="ti-bar-chart-alt"></i> Voir stats
                                     </h6>
                                   </div>
                                 </a>
-                                <a class="dropdown-item">
+                                <a class="dropdown-item" href="?action=delete&del_user_id={{user.username}}">
                                   <div class="item-content flex-grow">
                                     <h6 class="ellipsis font-weight-normal"><i class="ti-trash"></i> Supprimer
                                     </h6>
                                   </div>
                                 </a>
-                                <a class="dropdown-item">
+                                {% if user.is_active %}
+                                <a class="dropdown-item" href="?action=banir&del_user_id={{user.username}}">
                                   <div class="item-content flex-grow">
-                                    <h6 class="ellipsis font-weight-normal"><i class="ti-face-sad"></i> Desactiver/Banir
+                                    <h6 class="ellipsis font-weight-normal"><i class="ti-face-sad"></i> Banir l'utilisateur
                                     </h6>
                                   </div>
                                 </a>
+                                {% else %}
+                                <a class="dropdown-item" href="?action=unbanir&del_user_id={{user.username}}">
+                                  <div class="item-content flex-grow">
+                                    <h6 class="ellipsis font-weight-normal"><i class="ti-face-sad"></i> Retablir l'access
+                                    </h6>
+                                  </div>
+                                </a>
+                                {% endif %}
                                   
                                 </div>
                           </td>
