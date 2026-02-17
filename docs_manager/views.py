@@ -79,6 +79,8 @@ class UserLogin(View):
         if user is not None:
             login(request,user)
             request.session['identifiant']=data['identifiant']
+            if user.check_password("12345678"):
+                return redirect("change_password")
             if request.GET.dict().get("next"):
                 return redirect(request.GET.dict().get("next"))
             return redirect("dashboard")
@@ -446,6 +448,8 @@ class UserList(LoginRequiredMixin, View):
             data['ask_for_delete']=True if "action" in request.GET.dict().keys() and request.GET.dict().get("action") == "delete"  else False
             data['ban_user']=True if "action" in request.GET.dict().keys() and request.GET.dict().get("action") == "banir"  else False
             data['unban_user']=True if "action" in request.GET.dict().keys() and request.GET.dict().get("action") == "unbanir"  else False
+            data['reset_pass']=True if "action" in request.GET.dict().keys() and request.GET.dict().get("action") == "reset_pass"  else False
+                   
         return render(request, 'main_tmpl/pages/users_list.html',data)
 
 #-----------------------
@@ -453,7 +457,11 @@ class UserList(LoginRequiredMixin, View):
 class DeleteUser(LoginRequiredMixin, View):
     def get(self, request):
         try:
-            User.objects.get(username=request.GET.dict().get("user_id", None)).delete()
+            if not request.user.is_superuser:
+                messages.error(request, "Seul un admin peu supprimer un compte!")
+            else:
+                User.objects.get(username=request.GET.dict().get("user_id", None)).delete()
+            
         except:
             pass
         return redirect("users_list")
@@ -494,14 +502,80 @@ class AddAccount(LoginRequiredMixin,View):
             "type_acc":request.POST.dict().get("type_acc",None),
             "password":"12345678"
         }
+        #seul un compte prof ou admin peuvent ajouter des compte
+        if not request.user.is_staff and not request.user.is_superuser:
+            messages.error(request, "Seul un adminastreur ou un professeur peuvent ajouter des comptes!")
+            return render(request, 'main_tmpl/pages/add_account.html',data)
+
+        #seul un admin peu ajouter un compte professeur----------------------------
+        if data['type_acc'] == 'staff' and not request.user.is_superuser:
+            messages.error(request, "Seul un adminastreur peut ajouter des comptes professeur!")
+            return render(request, 'main_tmpl/pages/add_account.html',data)
+        
+        #verifier si le compte existe pas deja
+        if User.objects.filter(email=data['email']).exists():
+            messages.error(request, "Il existe deja un compte avec cette adresse email!")
+            return render(request, 'main_tmpl/pages/add_account.html',data)
+
+        
         user_id=userid_code_generator()
         while User.objects.filter(username=user_id).exists():
             user_id=userid_code_generator()
-        user=User.objects.create_user(username=user_id, first_name=data['first_name'], last_name=data['last_name'], email=data['email'],password=data['password'])
-        messages.success(request, f"Compte creer avec success, IDENTIFIANT :{user_id}")
+
+        is_staff=True if data['type_acc'] == "staff" else False
+        #les compte eleve n'ont pas besoin de verifier email.
+        is_active=True if data['type_acc'] != "staff" else False
+
+        user=User.objects.create_user(username=f"U{user_id}", first_name=data['first_name'], last_name=data['last_name'], email=data['email'],password=data['password'],is_active=is_active, is_staff=is_staff)
+        messages.success(request, f"Compte creer avec success, IDENTIFIANT : {user.username} MOT DE PASSE : 12345678  l'utilisateur devra changer le mot de passe lors de sa premiere connexion.")
         return render(request, 'main_tmpl/pages/add_account.html',data)
+
+
+class ChangePassword(LoginRequiredMixin,View):
+
+    def get(self, request):
+        data={
+            "user":request.user
+        }
+        if data['user'].check_password("12345678"):
+            data['default_pass']=True
+        
+        return render(request, 'main_tmpl/pages/change_password.html',data)
+    
+    def post(self, request):
+        user=request.user
+        data={
+            "user":user
+        }
+        password=request.POST.dict().get("password")
+        new_password=request.POST.dict().get("new_pass")
+        confirm_new_pass=request.POST.dict().get("confirm_pass")
+        if not user.check_password(password):
+            messages.error(request, "Ancien mot de passe incorrect, reessayer svp")
+            return redirect("change_password")
+        if new_password != confirm_new_pass:
+            messages.error(request, "Nouveau mot de passe et confirme nouveau mot de passe doit etre identique")
+            return redirect("change_password")
+        
+        if not check_password(new_password):
+            messages.error(request, "Le mot de passe doit etre superieur ou egale a 6 caracteres, vous devez melanger les lettre, chiffres et caracteres speciaux pour un mot de passe solide.")
+            return redirect("change_password")
+        user.set_password(new_password)
+        user.save()
+        messages.success(request, "Votre mot de passe a etait modifier avec success!")
+        data['is_change_pwd']=True
+        return render(request, 'main_tmpl/pages/change_password.html',data)
+
+class UserSubscription(LoginRequiredMixin, View):
+    
+    def get(self,request):
+        data={
+            "user":request.user
+        }
+        return render(request, 'main_tmpl/pages/subscriptions.html',data) 
+
 def send_code(request):
-    next_url=request.GET.dict().get("next")
+    next_url=request.GET.dict().get("next",None)
     if "user_id" in request.session.keys():
         user=User.objects.get(username=request.session['user_id'])
     else:
@@ -512,6 +586,22 @@ def send_code(request):
     if next_url:
         return redirect(next_url)
     return redirect("verify_code")
+
+def reset_password(request):
+    user_id=request.GET.dict().get("user_id",None)
+    if not request.user.is_superuser:
+        messages.error(request, "Seul un admin peut reinitialiser un mot de passe!")
+    else:
+        if user_id:
+            try:
+                user=User.objects.get(username=user_id)
+                user.set_password("12345678")
+                user.save()
+                messages.success(request, "Mot de passe reinitialiser avec success!")
+            except:
+                messages.error(request, "compte utilisateur introuvable!")
+    return redirect("users_list")
+
 
 def logout_view(request):
     logout(request)

@@ -92,6 +92,38 @@
     },1000)
    </script>
   {% endif %}
+
+  {% if reset_pass %}
+  <script>
+    setTimeout(()=>{
+      Swal.fire({
+        title: "<strong>Vous voulez reinitialiser le mot de passe du compte {{del_user.username}}?</strong>",
+        icon: "info",
+        html: `
+          le compte de <b class="text-primary">{{del_user.first_name}} {{del_user.last_name}}</b> sera reinitialiser vers le mot de passe par defaut qui est : 12345678
+        `,
+        showCloseButton: true,
+        showCancelButton: true,
+        focusConfirm: false,
+        confirmButtonText: `
+          <i class="fa fa-thumbs-up"></i> Reinitialiser
+        `,
+        confirmButtonAriaLabel: "Thumbs up, great!",
+        cancelButtonText: `
+          Annuler
+        `,
+        cancelButtonAriaLabel: "Thumbs down"
+      }).then((result) => {
+          if (result.isConfirmed) {
+            Swal.fire("Reinitialisation en cours...!", "", "info");
+            setTimeout(()=>{
+              window.location="{% url 'reset_password'%}?user_id={{del_user_id}}"
+            },1000)
+          }
+        });
+    },1000)
+   </script>
+  {% endif %}
           <div class="col-12 col-md-8">
               <div class="form-group">
                       <label for="inputSearch">Rechercher: </label> 
@@ -163,10 +195,24 @@
               </p>
             </div>
             {% endif %}
+            <div class="col-12">
+              {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                    <li class="text-danger">{{ message }}</li>
+                                {% else %}
+                                    <li class="text-success">{{ message }}</li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+            </div>
             <div class="col-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
                   <p class="card-title mb-0">Liste d'utilisateurs</p>
+                  
                   <div class="table-responsive" style="min-height: 70vh;">
                     <table class="table table-hover">
                       <thead>
@@ -247,6 +293,12 @@
                                   </div>
                                 </a>
                                 {% endif %}
+                                <a class="dropdown-item" href="?action=reset_pass&del_user_id={{user.username}}">
+                                  <div class="item-content flex-grow">
+                                    <h6 class="ellipsis font-weight-normal"><i class="ti-trash"></i> Reset password
+                                    </h6>
+                                  </div>
+                                </a>
                                   
                                 </div>
                           </td>

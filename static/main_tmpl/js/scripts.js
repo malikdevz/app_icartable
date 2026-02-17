@@ -14,12 +14,12 @@ Array.from(document.querySelectorAll("#copycode")).forEach((elem)=>{
 Array.from(document.querySelectorAll('#show_pwd')).forEach((elem)=>{
     elem.addEventListener("click", function(){
         if(elem.checked){
-            Array.from(document.querySelectorAll('input[name=password], input[name=confirm_pass]')).forEach((elem)=>{
+            Array.from(document.querySelectorAll('input[name=password], input[name=confirm_pass], input[name=new_pass]')).forEach((elem)=>{
                 elem.setAttribute("type","text")
             })
 
         }else{
-           Array.from(document.querySelectorAll('input[name=password], input[name=confirm_pass]')).forEach((elem)=>{
+           Array.from(document.querySelectorAll('input[name=password], input[name=confirm_pass],input[name=new_pass]')).forEach((elem)=>{
                 elem.setAttribute("type","password")
             })
         }

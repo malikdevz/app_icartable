@@ -18,7 +18,10 @@ from .views import  (
     DeleteUser,
     BanUser,
     UnBanUser,
-    AddAccount
+    AddAccount,
+    ChangePassword,
+    reset_password,
+    UserSubscription
 )
 
 urlpatterns = [
@@ -39,5 +42,8 @@ urlpatterns = [
     path('delete_user', DeleteUser.as_view(), name="delete_user"),
     path('ban_user', BanUser.as_view(),name="ban_user"),
     path('unban_user', UnBanUser.as_view(), name="unban_user"),
-    path('add_account', AddAccount.as_view(), name="add_account")
+    path('add_account', AddAccount.as_view(), name="add_account"),
+    path('change_password', ChangePassword.as_view(), name="change_password"),
+    path('reset_password', reset_password, name="reset_password"),
+    path('subscription',UserSubscription.as_view(), name="subscription")
 ]

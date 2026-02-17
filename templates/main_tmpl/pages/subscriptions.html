@@ -201,117 +201,68 @@
           </div>
         
           <div class="row">
-            <div class="col-md-12 grid-margin stretch-card">
+            <div class="col-12 grid-margin stretch-card">
               <div class="card position-relative">
                 <div class="card-body">
-                  <p class="card-title">COMPTE {{user.username}}</p>
+                  <p class="card-title">SOUSCRIPTIONS COMPTE <b class="text-primary">{{user.username}}</b></p>
                   <div class="row">
-                    <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-center">
-                      <div class="ml-xl-4">
-                        <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRDwmG52pVI5JZfn04j9gdtsd8pAGbqjjLswg&s" class="img col-12"/>
-                        <button type="button" class="btn btn-outline-light btn-icon-text my-2">
-                          <i class="ti-upload btn-icon-prepend"></i>                                                    
-                          Changer photo
-                        </button>
-                      </div>  
-                    </div>
-                    <div class="col-md-12 col-xl-9">
+                    
+                    <div class="col-12">
                       <div class="row">
-                        <div class="col-md-6 mt-3 col-xl-5">
-                          <canvas id="user-stats-chart"></canvas>
-                          <div id="user-stats-chart-legend"></div>
-                        </div>
+                        
 
-                        <div class="col-md-5 col-xl-7 mb-3 mb-md-0 mt-3 mt-md-0 grid-margin stretch-card">
+                        <div class="col-12 mb-3 mb-md-0 mt-3 mt-md-0 grid-margin stretch-card">
                         <div class="card" style="border: 0px !important;box-shadow: none !important;">
                           <div class="card-body">
-                            
-                            <div class="list-wrapper pt-2" style="overflow: hidden !important;">
-                              <ul class="d-flex flex-column" style="border: 0px !important;">
-                                 <li>
-                                   <h5 class="font-weight-bold mb-0">{{user.username}}</h5>
-                                </li>
-                                <li>
-                                   <h5 class="font-weight-bold mb-0">{{user.first_name}}</h5>
-                                </li>
-                                <li>
-                                   <h5 class="font-weight-bold mb-0">{{user.last_name}}</h5>
-                                </li>
-                                <li>
-                                   <h5 class="font-weight-bold mb-0">{{user.email}}</h5>
-                                </li>
-                                <li>
-                                   <h5 class="font-weight-bold mb-0">Inscrit le : {{user.date_joined}}</h5>
-                                </li>
-                                <li>
-                                   {% if user.is_active %}
-                                  <h5 class="font-weight-bold mb-0 text-success">Active</h5>
-                                  {% else %}
-                                  <h5 class="font-weight-bold mb-0 text-danger">Inactive</h5>
-                                  {% endif %}
-                                </li>
-                                <li>
-                                   {% if user.is_superuser %}
-                                  <h5 class="font-weight-bold mb-0 text-muted">Compte Admin</h5>
-                                  {% elif user.is_staff %}
-                                  <h5 class="font-weight-bold mb-0 text-muted">Compte Professeur</h5>
-                                  {% else %}
-                                  <h5 class="font-weight-bold mb-0 text-muted">Compte Eleve</h5>
-                                  {% endif %}
-                                </li>
-                               
-                                
-                              </ul>
+                            <div class="row">
+                                <div class="col-12 text-center">
+                                    <h1 class="text-primary">CLASSIC</h1>
+                                    <p class="text-muted">Votre souscription actuelle est classic, un compte par defaut fourni lors de l'inscription.</p>
+                                    <h4 class="text-muted">Liste de service accessible par un compte classic : </h4>
+                                </div>
+                                <div class="col-12">
+                                    <div class="list-wrapper pt-2" style="overflow:visible !important;min-height: 70vh;">
+                                    <ul class="d-flex flex-column" style="border: 0px !important;">
+                                        <li>
+                                        <h5 class="font-weight-bold mb-0 text-muted">Maximum de docs : <b class="text-primary">100</b></h5>
+                                        </li>
+                                        <li>
+                                        <h5 class="font-weight-bold mb-0 text-muted">Maximum de livre : <b class="text-primary">5</b></h5>
+                                        </li>
+                                        <li>
+                                        <h5 class="font-weight-bold mb-0 text-muted">Maximum de classe  : <b class="text-primary">5</b></h5>
+                                        </li>
+                                        <li>
+                                        <h5 class="font-weight-bold mb-0 text-muted">Maximum d'eleve par classe : <b class="text-primary">10</b></h5>
+                                        </li>
+                                        <li>
+                                        <h5 class="font-weight-bold mb-0 text-muted">Maximum de quiz : <b class="text-primary">10</b></h5>
+                                        </li>
+                                        <li>
+                                        <h5 class="font-weight-bold mb-0 text-muted">Nombre de question par quiz : <b class="text-primary">10</b></h5>
+
+                                        </li>
+                                        </li>
+                                        <li>
+                                        <h5 class="font-weight-bold mb-0 text-muted">Utilisation d'IA : <b class="text-primary">10 requetes/Jours</b></h5>
+                                        
+                                        </li>
+                                        
+                                    
+                                        
+                                    </ul>
+                                    </div>
+                                </div>
+                                <div class="col-12 text-center my-3">
+                                    <button type="button" class="btn btn-primary btn-rounded btn-fw text-white">Migrer vers un compte pro</button>
+                                </div>
                             </div>
-                            
                           </div>
                         </div>
                       </div>
 
 
-                        <div class="col-md-6 col-xl-7 d-none">
-                          <div class="table-responsive mb-3 mb-md-0">
-                            <table class="table table-borderless report-table table-responsive">
-                              <tr>
-                                <td class="text-muted">NOM :</td>
-                               
-                                <td><h5 class="font-weight-bold mb-0">{{user.first_name}}</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">PRENOM : </td>
-                               
-                                <td><h5 class="font-weight-bold mb-0">{{user.last_name}}</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">IDENTIFIANT : </td>
-                            
-                                <td><h5 class="font-weight-bold mb-0">{{user.username}}</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">EMAIL :</td>
-                               
-                                <td><h5 class="font-weight-bold mb-0">{{user.email}}</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">DATE INSCRIPTION : </td>
-                                
-                                <td><h5 class="font-weight-bold mb-0">{{user.date_joined}}</h5></td>
-                              </tr>
-                              <tr>
-                                <td class="text-muted">STATUT DE COMPTE</td>
-                               
-                                <td>
-                                  {% if user.is_active %}
-                                  <h5 class="font-weight-bold mb-0 text-success">Active</h5>
-                                  {% else %}
-                                  <h5 class="font-weight-bold mb-0 text-danger">Inactive</h5>
-                                  {% endif %}
-                                </td>
-                              </tr>
-                              
-                            </table>
-                          </div>
-                        </div>
+                       
                       </div>
                     </div>
                   
