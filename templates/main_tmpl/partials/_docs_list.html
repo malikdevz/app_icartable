@@ -1,0 +1,210 @@
+{% load custom_filters %}
+<div class="row">
+ 
+          <div class="col-12 col-md-8">
+              <div class="form-group">
+                      <label for="inputSearch">Rechercher: </label> 
+                      <form method="get" action="">            
+                    <div class="input-group">
+                        
+                          <input type="text" value="" name="srch_wd" placeholder="Search doc_ref, titre doc,....." class="form-control form-control-lg border-left-0" id="inputSearch" required>                        
+                        <div class="input-group-prepend bg-transparent">
+                              <button type="submit" class="input-group-text bg-primary border-right-0">
+                                  <i class="ti-search text-white"></i>
+                              </button>
+                          </div>
+                        </div>
+                        </form>
+              </div>
+            </div>
+            
+
+            <div class="col-12 col-md-4">
+              <form method="get" action="">
+              <div class="form-group">
+               <label>Filtres :</label>
+              <div class="input-group">
+                 
+                  <select class="form-control form-control-lg text-black bg-white" id="" name="filter" required>
+                    <option >Choisir....</option>
+                    {% if not is_public %}
+                    <option value="shared" {% if filter_wd == 'shared' %}selected{% endif %}>Doc(s) partager</option>
+                    <option value="unshared" {% if filter_wd == 'unshared' %}selected{% endif %}>Doc(s) non partager</option>
+                    {% endif %}
+                  
+                    <option value="reg_today" {% if filter_wd == 'reg_today' %}selected{% endif %}>Ajouter aujourdhui</option>
+                    <option value="reg_this_week" {% if filter_wd == 'reg_this_week' %}selected{% endif %}>Ajouter cette semaine</option>
+                    <option value="reg_this_mth" {% if filter_wd == 'reg_this_mth' %}selected{% endif %}>Ajouter ce mois-ci</option>
+                  </select>
+                   <div class="input-group-prepend bg-transparent">
+                              <button type="submit" class="input-group-text bg-primary border-right-0">
+                                  <i class="ti-exchange-vertical text-white"></i>
+                              </button>
+                          </div>
+                </div>
+                </div>
+              </form>
+            </div>
+            {% if is_srch %}
+            <div class="col-12">
+              <p>Resultat pour : <span style="font-weight: bold;">{{srch_wd}}</span>
+
+                
+                <button type="button" class="btn btn-sm btn-icon" style="font-weight: bold;font-size: 12px;">
+                        {{docs|length}}
+                      </button>
+                      doc(s)
+               <a href="{% url 'mddocs_list' %}" class="btn btn-primary btn-rounded btn-fw">Tout les documents</a>
+              </p>
+            </div>
+            {% endif %}
+
+            {% if is_filter %}
+            <div class="col-12">
+              <p>Filtrer par : <span style="font-weight: bold;">
+                {% if filter_wd == 'shared'%}Partager dans domaine public{%endif%}
+                 {% if filter_wd == 'unshared'%}Non partager dans le domaine public{%endif%}
+                 {% if filter_wd == 'reg_today'%}Ajouter aujourdhui{%endif%}
+                 {% if filter_wd == 'reg_this_week'%}Ajouter cette semaine{%endif%}
+                 {% if filter_wd == 'reg_this_mth'%}Ajouter ce mois ci{%endif%}
+              </span>
+
+                
+                <button type="button" class="btn btn-sm btn-icon" style="font-weight: bold;font-size: 12px;">
+                        {{docs|length}}
+                      </button>
+                      doc(s)
+               <a href="{% url 'users_list' %}" class="btn btn-primary btn-rounded btn-fw">Tout les docs</a>
+              </p>
+            </div>
+            {% endif %}
+            <div class="col-12">
+              {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                    <li class="text-danger">{{ message }}</li>
+                                {% else %}
+                                    <li class="text-success">{{ message }}</li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+            </div>
+            <div class="col-12 grid-margin stretch-card">
+              <div class="card">
+                <div class="card-body">
+                  <p class="card-title mb-0">
+                    <button type="button" class="btn btn-light btn-rounded btn-fw"><b class="text-primary" style="font-size: 15px;">{{docs|length}}</b> Documents</button>
+                  </p>
+                  
+                  <div class="table-responsive" style="min-height: 70vh;">
+                    
+                    <table class="table table-hover text-muted"> 
+                      <thead>
+                        <tr>
+                          <th>#</th>
+                   
+                          <th>CODE REF</th>
+                          <th>AUTEUR</th>
+                          <th>TITRE</th>
+                          <th>DATE D'AJOUT</th>
+                          <th>FICHIER</th>
+                          <th>PUBLIC</th>
+                          
+                          
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {% for doc in docs %}
+                        <tr>
+                          <td>
+                            {{forloop.counter}}
+                          </td>
+                        
+                          
+                          <td><b>{{doc.ref}}</b></td>
+                          <td><b>{{doc.user.last_name}}</b></td>
+                          <td title="{{doc.title}}">
+                            {% if is_public %}
+                            <a style="text-decoration: none;" href="{% url 'show_document' %}?doc_ref={{doc.ref}}&next=public_docs">{{doc.title|cut_doc_title}}</a>
+                            {% else %}
+                            <a style="text-decoration: none;" href="{% url 'show_document' %}?doc_ref={{doc.ref}}">{{doc.title|cut_doc_title}}</a>
+                            {%endif%}
+                          </td>
+                          <td>{{ doc.date_add|date:"d/m/Y H:i" }}</td>
+                          <td class="text-muted">{{doc.doc_name}} 
+                            <a href="{% url 'download_md_doc' %}?doc_ref={{doc.ref}}" title="Telecharger le fichier markdown" class="btn btn-rounded btn-icon" download>
+                              <i class="ti-cloud-down text-primary"></i>
+                            </a>
+                          </td>
+                        
+                          {% if doc.is_public %}
+                           
+                              <td>Oui</td>
+                          {% else %}
+                          <td>Non</td>
+                          {% endif %}
+
+                          
+                          
+                          
+                        </tr>
+                        {% endfor %}
+                        
+                       
+                      </tbody>
+                    </table>
+
+
+                  </div>
+
+                  <div class="row my-3">
+                    <div class="col-12 text-center">
+                          <nav aria-label="Page navigation example">
+                            <ul class="pagination">
+                              {% if users.has_previous %}
+                               <li class="page-item">
+                                <a class="page-link" href="{% url 'users_list' %}?page={{ docs.previous_page_number }}" aria-label="Previous">
+                                  <span aria-hidden="true">Precedente &laquo;</span>
+                                </a>
+                              </li>
+                              {% else %}
+                              <li class="page-item">
+                                <a class="page-link text-muted" aria-label="Previous">
+                                  <span aria-hidden="true">Precedente &laquo;</span>
+                                </a>
+                              </li>
+                              {% endif %}
+
+                              <li class="page-item">
+                                <a class="page-link text-bold">
+                                {{docs.number}}/{{docs.paginator.num_pages}}
+                                </a>
+                              </li>
+                              
+                              {% if users.has_next %}
+                              <li class="page-item">
+
+                                <a class="page-link" href="{% url 'users_list' %}?page={{ users.next_page_number }}" aria-label="Next">
+                                  <span aria-hidden="true">&raquo; Suivante</span>
+                                </a>
+                              </li>
+                              
+                              {% else %}
+                              <li class="page-item disable">
+
+                                <a class="page-link text-muted" aria-label="Next">
+                                  <span aria-hidden="true">&raquo; Suivante</span>
+                                </a>
+                              </li>
+                              {% endif %}
+                            </ul>
+                          </nav>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>

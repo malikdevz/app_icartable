@@ -25,3 +25,22 @@ Array.from(document.querySelectorAll('#show_pwd')).forEach((elem)=>{
         }
     })
 })
+
+function change_profile_pic(){
+    Swal.fire({
+    title: "<strong>Changer photo de profile</u></strong>",
+    html:document.getElementById("change_pic_form").innerHTML,
+    showCloseButton: true,
+    showCancelButton: false,
+    showConfirmButton: false,
+    focusConfirm: false,
+    confirmButtonText: `
+        <i class="fa fa-thumbs-up"></i> Great!
+    `,
+    confirmButtonAriaLabel: "Thumbs up, great!",
+    cancelButtonText: `
+        <i class="fa fa-thumbs-down"></i>
+    `,
+    cancelButtonAriaLabel: "Thumbs down"
+    });
+}

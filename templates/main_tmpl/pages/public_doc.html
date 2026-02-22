@@ -1,19 +1,22 @@
 {% extends "main_tmpl/base.html" %}
 {% block title %}
-ICARTABLE - Liste d'utilisateurs
+ICARTABLE - Mes documents
 {%endblock%}
 
 {% block header_title %}
 <div>
-  <h4 class="font-weight-bold mb-0 text-white">Liste d'utilisateurs</h4>
+  <h4 class="font-weight-bold mb-0 text-white">Ressources public</h4>
 </div>
 {% endblock %}
 
+{% block command_btn %}
+<button onclick="window.location.href='/dashboard'" type="button" class="btn btn-social-icon-text btn-primary m-1 text-white"><i class="ti-home"></i> Acceuil</button>
+{%endblock%}
+
 {% block content %}
-{% include 'main_tmpl/partials/_users_list.html' %}
-<div class="row">
-            
-            <div class="col-md-12 grid-margin stretch-card">
+{% include 'main_tmpl/partials/_docs_list.html' %}
+  <div class="row">
+    <div class="col-md-12 grid-margin stretch-card">
               <div class="card position-relative">
                 <div class="card-body">
                   <p class="card-title">Stats Utilisateurs</p>
@@ -72,9 +75,9 @@ ICARTABLE - Liste d'utilisateurs
             </div>
           </div>
 {%endblock%}
-
- {% block custom_scripts %}
-    <script>
+{% block custom_scripts %}
+    
+   <script>
     (function($) {
   'use strict';
   $(function() {
@@ -156,6 +159,4 @@ ICARTABLE - Liste d'utilisateurs
 })(jQuery);
    </script>
 {%endblock%}
-
-
 

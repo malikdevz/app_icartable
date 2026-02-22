@@ -2,15 +2,15 @@
         <ul class="nav">
           <li class="nav-item">
             <a class="nav-link" href="{% url 'dashboard' %}">
-              <i class="ti-shield menu-icon"></i>
-              <span class="menu-title">Dashboard</span>
+              <i class="ti-home menu-icon"></i>
+              <span class="menu-title">Acceuil</span>
             </a>
           </li>
           <li class="nav-item">
             <a class="nav-link" data-bs-toggle="collapse" href="#ui-basic" aria-expanded="false" aria-controls="ui-basic">
               
               <i class="ti-user menu-icon"></i>
-              <span class="menu-title">Mon compte</span>
+              <span class="menu-title">Compte</span>
               <i class="menu-arrow"></i>
             </a>
             <div class="collapse" id="ui-basic">
@@ -25,14 +25,44 @@
           <li class="nav-item">
             <a class="nav-link" data-bs-toggle="collapse" href="#acc-manager" aria-expanded="false" aria-controls="ui-basic">
               
-              <i class="ti-archive menu-icon"></i>
-              <span class="menu-title">Gestion users</span>
+              <i class="ti-id-badge menu-icon"></i>
+              <span class="menu-title">Utilisateurs</span>
               <i class="menu-arrow"></i>
             </a>
             <div class="collapse" id="acc-manager">
               <ul class="nav flex-column sub-menu">
                 <li class="nav-item"> <a class="nav-link" href="{% url 'users_list' %}">Liste d'utilisateurs</a></li>
                 <li class="nav-item"> <a class="nav-link" href="{% url 'add_account' %}">Ajouter utilisateur</a></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#docs-manager" aria-expanded="false" aria-controls="ui-basic">
+              
+              <i class="ti-archive menu-icon"></i>
+              <span class="menu-title">MD documents</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="docs-manager">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="{% url 'mddocs_list' %}">Mes  docs</a></li>
+                <li class="nav-item"> <a class="nav-link" href="{% url 'public_docs' %}">Ressources public</a></li>
+                <li class="nav-item"> <a class="nav-link" href="">Ajouter docs</a></li>
+                <li class="nav-item"> <a class="nav-link" href="">Importer docs</a></li>
+              </ul>
+            </div>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" data-bs-toggle="collapse" href="#files-manager" aria-expanded="false" aria-controls="ui-basic">
+              
+              <i class="ti-folder menu-icon"></i>
+              <span class="menu-title">Fichiers</span>
+              <i class="menu-arrow"></i>
+            </a>
+            <div class="collapse" id="files-manager">
+              <ul class="nav flex-column sub-menu">
+                <li class="nav-item"> <a class="nav-link" href="">Mes fichiers</a></li>
+                <li class="nav-item"> <a class="nav-link" href="">Fichiers public</a></li>
               </ul>
             </div>
           </li>

@@ -40,7 +40,9 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'docs_manager'
+    'docs_manager',
+    'storages',
+    'django_cleanup.apps.CleanupConfig'
 ]
 
 MIDDLEWARE = [
@@ -128,8 +130,47 @@ USE_TZ = True
 LOGIN_URL="/"
 
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = '/static/'
+# --- 1. CONFIGURATION MINIO (MEDIA) ---
+# Vos identifiants MinIO
+AWS_ACCESS_KEY_ID = 'Malik'
+# ATTENTION : MinIO exige 8 caractères minimum, assurez-vous d'avoir changé "123o"
+AWS_SECRET_ACCESS_KEY = '1234@KeCo' 
+
+# Le nom du bucket que vous devrez créer dans l'interface MinIO
+AWS_STORAGE_BUCKET_NAME = 'media'
+
+# L'URL de l'API MinIO (Le port par défaut est 9000, pas 9001 !)
+# Si Django tourne en local (hors docker) :
+AWS_S3_ENDPOINT_URL = 'http://127.0.0.1:9000'
+# Si Django tourne DANS Docker sur le même réseau que MinIO :
+# AWS_S3_ENDPOINT_URL = 'http://minio:9000' (remplacez 'minio' par le nom du service dans docker-compose)
+
+AWS_S3_SIGNATURE_VERSION = 's3v4'
+AWS_S3_FILE_OVERWRITE = False  # Si un fichier a le même nom, on le renomme au lieu d'écraser
+AWS_S3_VERIFY = False  # Désactive la vérification SSL (car vous êtes en HTTP)
+AWS_S3_USE_SSL = False
+
+# --- 2. CONFIGURATION HYBRIDE (STORAGES) ---
+STORAGES = {
+    # "default" gère les uploads (FileField, ImageField) -> Vers MinIO
+    "default": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+    # "staticfiles" gère le CSS/JS -> Reste en Local
+    "staticfiles": {
+        "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+    },
+}
+
+# --- 3. URLs ---
+AWS_S3_URL_PROTOCOL = 'http:'
+# URL pour accéder aux médias (images uploadées)
+# Cela doit correspondre à l'adresse de votre bucket
+AWS_S3_CUSTOM_DOMAIN = f'127.0.0.1:9000/{AWS_STORAGE_BUCKET_NAME}'
+MEDIA_URL = f'/{STORAGES["default"]["OPTIONS"]["location"]}/' if 'location' in STORAGES.get("default", {}).get("OPTIONS", {}) else '/'
+
+# URL pour les fichiers statiques (local)
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] # Votre dossier static à la racine
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')   # Dossier collecté

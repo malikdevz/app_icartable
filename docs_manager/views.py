@@ -15,6 +15,8 @@ from django.contrib.auth import logout, login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils import timezone
 from django.core.paginator import Paginator
+from django.http import FileResponse, Http404
+import os
 
 def send_verification_code(user, title="ICARTABLE!"):
     # Générer un code à 6 chiffres
@@ -382,15 +384,16 @@ class UserList(LoginRequiredMixin, View):
         nbr_per_page=10
         
         data={
-            "users":[user for user in User.objects.all() if user != request.user],
+            "users":[user for user in User.objects.all().order_by('-date_joined') if user != request.user],
             "nbr_page":int(User.objects.all().count()/nbr_per_page),
             "current_p":int(request.GET.dict().get('page') if 'page' in request.GET.dict().keys() else 1),
             "current_url":request.build_absolute_uri(),
             "nbr_users":User.objects.count(),
-            "nbr_male":User.objects.count(),
-            "nbr_female":1,
-            "other_gender":1
+            "nbr_male":0,
+            "nbr_female":3,
+            "other_gender":2
         }
+        data['nbr_male']=len(data['users'])
         
 
         if "srch_wd" in request.GET.dict().keys():
@@ -453,6 +456,123 @@ class UserList(LoginRequiredMixin, View):
         return render(request, 'main_tmpl/pages/users_list.html',data)
 
 #-----------------------
+
+class MdDocsList(LoginRequiredMixin, View):
+
+    def get(self, request):
+        nbr_per_page=10
+        user=request.user
+        
+        data={
+            "docs":[doc for doc in user.user_docs.all()],
+            "nbr_page":int(User.objects.all().count()/nbr_per_page),
+            "current_p":int(request.GET.dict().get('page') if 'page' in request.GET.dict().keys() else 1),
+            "current_url":request.build_absolute_uri(),
+            "nbr_male":0,
+            "nbr_female":3,
+            "other_gender":2
+        }
+        
+
+        if "srch_wd" in request.GET.dict().keys():
+            data["srch_wd"]=request.GET.dict().get("srch_wd")
+            data['is_srch']=True
+            data['docs']=[]
+            for doc in user.user_docs.all():
+                if  data["srch_wd"].lower() in doc.title.lower() or data["srch_wd"] == doc.ref:# or user.first_name == data["srch_wd"] or user.last_name == data["srch_wd"] or user.email == data["srch_wd"]:
+                    data['docs'].append(doc)
+
+        if "filter" in request.GET.dict().keys():
+            data['filter_wd']=request.GET.dict().get("filter")
+            data['is_filter']=True
+            data['docs']=[]
+            for doc in user.user_docs.all():
+                tot_days_since_add=(timezone.now() - doc.date_add).days
+                if data['filter_wd'] == "shared" and doc.is_public:
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "unshared" and not doc.is_public:
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "reg_today" and doc.date_add.date() > timezone.now().date():#tot_days_since_add <= 1 :
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "reg_this_week" and tot_days_since_add <= 7 :
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "reg_this_mth" and tot_days_since_add <= 31 :
+                    data['docs'].append(doc)
+
+            #paginer la liste de users
+        paginator=Paginator(data['docs'], nbr_per_page)
+        data['docs']=paginator.get_page(data['current_p'])  
+        return render(request, 'main_tmpl/pages/mddocs_list.html',data)
+
+
+class MdDocsPublicList(LoginRequiredMixin, View):
+
+    def get(self, request):
+        nbr_per_page=10
+        user=request.user
+        
+        data={
+            "docs":[doc for doc in MdDocs.objects.filter(is_public=True)],
+            "nbr_page":int(User.objects.all().count()/nbr_per_page),
+            "current_p":int(request.GET.dict().get('page') if 'page' in request.GET.dict().keys() else 1),
+            "current_url":request.build_absolute_uri(),
+            "nbr_male":0,
+            "nbr_female":3,
+            "other_gender":2,
+            'is_public':True
+        }
+        
+
+        if "srch_wd" in request.GET.dict().keys():
+            data["srch_wd"]=request.GET.dict().get("srch_wd")
+            data['is_srch']=True
+            data['docs']=[]
+            for doc in MdDocs.objects.filter(is_public=True):
+                if  data["srch_wd"].lower() in doc.title.lower() or data["srch_wd"] == doc.ref:# or user.first_name == data["srch_wd"] or user.last_name == data["srch_wd"] or user.email == data["srch_wd"]:
+                    data['docs'].append(doc)
+
+        if "filter" in request.GET.dict().keys():
+            data['filter_wd']=request.GET.dict().get("filter")
+            data['is_filter']=True
+            data['docs']=[]
+            for doc in MdDocs.objects.filter(is_public=True):
+                tot_days_since_add=(timezone.now() - doc.date_add).days
+                if data['filter_wd'] == "shared" and doc.is_public:
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "unshared" and not doc.is_public:
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "reg_today" and doc.date_add.date() > timezone.now().date():#tot_days_since_add <= 1 :
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "reg_this_week" and tot_days_since_add <= 7 :
+                    data['docs'].append(doc)
+                elif data['filter_wd'] == "reg_this_mth" and tot_days_since_add <= 31 :
+                    data['docs'].append(doc)
+
+            #paginer la liste de users
+        paginator=Paginator(data['docs'], nbr_per_page)
+        data['docs']=paginator.get_page(data['current_p'])  
+        return render(request, 'main_tmpl/pages/public_doc.html',data)
+
+
+class ShowDocDetails(LoginRequiredMixin, View):
+
+    def get(self,request):
+        try:
+            doc=MdDocs.objects.get(ref=request.GET.dict().get("doc_ref", None))
+        except:
+            messages.error(request, "Ce document n'existe pas /plus")
+            if "next" in request.GET.dict().keys():
+                return redirect(request.GET.dict().get("next"))
+            else:
+                return redirect("mddocs_list")
+                
+        data={
+            "user":request.user,
+            "doc":doc
+
+        }
+
+        return render(request, 'main_tmpl/pages/show_document.html',data) 
 
 class DeleteUser(LoginRequiredMixin, View):
     def get(self, request):
@@ -527,6 +647,7 @@ class AddAccount(LoginRequiredMixin,View):
         is_active=True if data['type_acc'] != "staff" else False
 
         user=User.objects.create_user(username=f"U{user_id}", first_name=data['first_name'], last_name=data['last_name'], email=data['email'],password=data['password'],is_active=is_active, is_staff=is_staff)
+        UserProfilePic(user=user).save()
         messages.success(request, f"Compte creer avec success, IDENTIFIANT : {user.username} MOT DE PASSE : 12345678  l'utilisateur devra changer le mot de passe lors de sa premiere connexion.")
         return render(request, 'main_tmpl/pages/add_account.html',data)
 
@@ -572,7 +693,32 @@ class UserSubscription(LoginRequiredMixin, View):
         data={
             "user":request.user
         }
-        return render(request, 'main_tmpl/pages/subscriptions.html',data) 
+        return render(request, 'main_tmpl/pages/subscriptions.html',data)
+
+def change_profile_pic(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "Vous devez etre connecte pour modifier votre photo de profile!")
+        return redirect("edit_account")
+    
+    if "user_id" in request.POST.dict().keys() and User.objects.filter(username=request.POST.dict().get('user_id')).exists():
+        user=User.objects.get(username=request.POST.dict().get('user_id'))
+    else:
+        messages.error(request,"utilisateur non reconnu!")
+        return redirect("edit_account")
+
+    if request.method == "POST":
+        file=request.FILES['photo']
+        user_profile_pic=user.profile_pic if UserProfilePic.objects.filter(user=user).exists() else None
+        if user_profile_pic is None:
+            UserProfilePic(user=user, photo=file).save()
+            messages.success(request, "Votre photo de profile a etait modifier avec success")
+        else:
+            user_profile_pic.photo=file
+            user_profile_pic.save()
+            messages.success(request, "Votre photo de profile a etait modifier avec success")
+    else:
+        messages.erro(request,"Vous devez soumetre une requete POST pour modifier une photo de profile") 
+    return redirect(f"/edit_account?user_id={user.username}")
 
 def send_code(request):
     next_url=request.GET.dict().get("next",None)
@@ -601,6 +747,26 @@ def reset_password(request):
             except:
                 messages.error(request, "compte utilisateur introuvable!")
     return redirect("users_list")
+
+
+
+def download_doc(request):
+    doc_ref=request.GET.dict().get("doc_ref",None)
+    if doc_ref:
+        try:
+            doc=MdDocs.objects.get(ref=doc_ref)
+        except:
+            pass
+    if doc:
+        response=FileResponse(doc.doc.open('rb'))
+        response['Content-Disposition'] = f'attachment; filename="{os.path.basename(doc.doc.name)}"'
+        return response
+        
+        
+    if "next" in request.GET.dict.get("next",None):
+        return redirect(request.GET.dict().get("next"))
+    else:
+        return redirect("mddocs_list")
 
 
 def logout_view(request):

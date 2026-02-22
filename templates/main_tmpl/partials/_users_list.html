@@ -211,13 +211,13 @@
             <div class="col-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-body">
-                  <p class="card-title mb-0">Liste d'utilisateurs</p>
+                  <p class="card-title mb-0">Liste d'utilisateurs, Total <b class="text-primary" style="font-size: 18px;">{{users|length}}</b> Utilisateur(s)</p>
                   
                   <div class="table-responsive" style="min-height: 70vh;">
                     <table class="table table-hover">
                       <thead>
                         <tr>
-                          
+                          <th>#</th>
                           <th>DATE INSCRIPTION</th>
                           <th>IDENTIFIANT</th>
                           <th>NOM</th>
@@ -231,8 +231,12 @@
                       <tbody>
                         {% for user in users %}
                         <tr>
-                          
-                          <td>{{user.date_joined}}</td>
+                          <td>
+                            <div style="background-image: url({{user.profile_pic.photo.url}});background-repeat: no-repeat;background-size: cover; height: 30px;width: 30px;background-color: blue;margin: 0px;padding: 0px;border-radius: 50%/50%;">
+
+                            </div>
+                          </td>
+                          <td>{{ user.date_joined|date:"d/m/Y H:i" }}</td>
                           <td><a style="text-decoration: none;" href="{% url 'user_account' %}?user_id={{user.username}}"> {{user.username}}</a></td>
                           <td>{{user.first_name}}</td>
                           <td>{{user.last_name}}</td>

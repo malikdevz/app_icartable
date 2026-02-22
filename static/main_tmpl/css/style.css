@@ -8919,7 +8919,7 @@ label {
   display: inline-block;
 }
 
-button {
+button ,a.btn{
   border-radius: 0;
 }
 
@@ -8929,6 +8929,7 @@ button:focus:not(:focus-visible) {
 
 input,
 button,
+a.btn,
 select,
 optgroup,
 textarea {
@@ -8938,7 +8939,7 @@ textarea {
   line-height: inherit;
 }
 
-button,
+button,a.btn,
 select {
   text-transform: none;
 }

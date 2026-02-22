@@ -21,7 +21,12 @@ from .views import  (
     AddAccount,
     ChangePassword,
     reset_password,
-    UserSubscription
+    UserSubscription,
+    change_profile_pic,
+    MdDocsList,
+    download_doc,
+    MdDocsPublicList,
+    ShowDocDetails
 )
 
 urlpatterns = [
@@ -45,5 +50,10 @@ urlpatterns = [
     path('add_account', AddAccount.as_view(), name="add_account"),
     path('change_password', ChangePassword.as_view(), name="change_password"),
     path('reset_password', reset_password, name="reset_password"),
-    path('subscription',UserSubscription.as_view(), name="subscription")
+    path('subscription',UserSubscription.as_view(), name="subscription"),
+    path("change_profile_pic",change_profile_pic, name="change_profile_pic"),
+    path('mddocs_list', MdDocsList.as_view(), name="mddocs_list"),
+    path('download_md_doc',download_doc, name="download_md_doc"),
+    path('public_docs', MdDocsPublicList.as_view(), name="public_docs"),
+    path('show_document', ShowDocDetails.as_view(), name="show_document")
 ]

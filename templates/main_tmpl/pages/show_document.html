@@ -1,0 +1,203 @@
+{% extends "main_tmpl/base.html" %}
+{% block title %}
+ICARTABLE - Mon compte
+{%endblock%}
+
+{% block header_title %}
+<div>
+  <h4 class="font-weight-bold mb-0 text-white"><i class="ti-angle-right"></i> {{doc.title}}</h4>
+</div>
+{% endblock %}
+
+{% block command_btn %}
+
+{%endblock%}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 my-2">
+        <button title="Modifier les details du document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+            <i class="ti-pencil btn-icon-prepend"></i>
+            Modifier
+            </button>
+        <button title="Editer le contenu du document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+            <i class="ti-pencil-alt btn-icon-prepend"></i>
+            Editer
+            </button>
+        <button title="Supperimer le document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+            <i class="ti-trash btn-icon-prepend"></i>
+            Supprimer
+            </button>
+        <button title="Lire le document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+            <i class="ti-book btn-icon-prepend"></i>
+            Lecture
+            </button>
+        <button title="Editer le contenu du document" type="button" class="btn btn-light btn-icon-text btn-rounded text-primary">
+            <i class="ti-eye btn-icon-prepend"></i>
+            Vue ( 0 )
+            </button>
+        <button title="Editer le contenu du document" type="button" class="btn btn-light btn-icon-text btn-rounded text-primary">
+            <i class="ti-layers-alt btn-icon-prepend"></i>
+            Cloner ( 0 )
+            </button>
+    </div>
+            <div class="col-md-12 grid-margin stretch-card">
+              <div class="card position-relative">
+                <div class="card-body">
+                  
+                  <div class="row">
+                    <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-center">
+                      <div class="ml-xl-4">
+                        <img src="https://filenp.com/images/extension/256/md.png" alt="photo de profile" class="img col-12"/>
+                        
+                      </div>  
+                    </div>
+                    <div class="col-md-12 col-xl-9">
+                      <div class="row">
+                       
+
+                        <div class="col-md-5 col-xl-7 mb-3 mb-md-0 mt-3 mt-md-0 grid-margin stretch-card">
+                        <div class="card" style="border: 0px !important;box-shadow: none !important;">
+                          <div class="card-body">
+                            
+                            <div class="list-wrapper pt-2" style="overflow: hidden !important;">
+                              <ul class="d-flex flex-column" style="border: 0px !important;">
+                                 <li>
+                                   <h5 class="font-weight-bold mb-0" style="font-weight: normal !important;font-size: 13px !important;">Titre : {{doc.title}}</h5>
+                                </li>
+                                <li>
+                                   <h5 class="font-weight-bold mb-0" style="font-weight: normal !important;font-size: 13px !important;">Fichier : {{doc.doc_name}}</h5>
+                                </li>
+                                <li>
+                                   <h5 class="font-weight-bold mb-0" style="font-weight: normal !important;font-size: 13px !important;">Code REF : {{doc.ref}}</h5>
+                                </li>
+                                <li>
+                                   <h5 class="mb-0" style="font-weight: normal !important;font-size: 13px !important;">Ajouter : {{doc.date_add}}</h5>
+                                </li>
+                                <li>
+                                   <h5 class="mb-0" style="font-weight: normal !important;font-size: 13px !important;">Dernier modification : {{doc.date_add}}</h5>
+                                </li>
+                                
+                        
+                                <li>
+                                   {% if doc.is_public %}
+                                  <h5 class="font-weight-bold mb-0 text-success" style="font-weight: normal !important;font-size: 13px !important;">Ce document est partager en public</h5>
+                                  <button title="Editer le contenu du document" type="button" class="btn mx-1 btn-light btn-icon-text btn-rounded text-primary">
+            Arreter le partage
+                                  </button>
+                                  {% else %}
+                                  <h5 class="font-weight-bold mb-0 text-danger" style="font-weight: normal !important;font-size: 13px !important;">Non partager pour le public</h5>
+                                  <button title="Editer le contenu du document" type="button" class="btn mx-1 btn-light btn-icon-text btn-rounded text-primary">
+            Partage avec le public
+            </button>
+                                  {% endif %}
+                                </li>
+                              
+                                
+                              </ul>
+                            </div>
+                            
+                          </div>
+                        </div>
+                      </div>
+
+
+                        <div class="col-md-12 col-xl-3 d-flex flex-column justify-content-center">
+                      <div class="ml-xl-4">
+                        <img src="https://avatars.mds.yandex.net/i?id=f0432d38243f877b01dc0872e7454bedcb3667ea-2988630-images-thumbs&n=13" alt="photo de profile" class="img col-12"/>
+                        
+                      </div>  
+                    </div>
+                      </div>
+                    </div>
+                  
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+{%endblock%}
+{% block custom_scripts %}
+   <script>
+    (function($) {
+  'use strict';
+  $(function() {
+    if ($("#user-stats-chart").length) {
+      var areaData = {
+        labels: ["Jan", "Feb", "Mar"],
+        datasets: [{
+            data: [100, 50, 50],
+            backgroundColor: [
+              "#71c016", "#8caaff", "#248afd",
+            ],
+            borderColor: "rgba(0,0,0,0)"
+          }
+        ]
+      };
+      var areaOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        segmentShowStroke: false,
+        cutoutPercentage: 78,
+        elements: {
+          arc: {
+              borderWidth: 4
+          }
+        },      
+        legend: {
+          display: false
+        },
+        tooltips: {
+          enabled: true
+        },
+        legendCallback: function(chart) { 
+          var text = [];
+          text.push('<div class="report-chart">');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[0] + '"></div><p class="mb-0">Nbr lecture</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[1] + '"></div><p class="mb-0">Nbr clonage</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[2] + '"></div><p class="mb-0">Nbr telechargement</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+          text.push('</div>');
+          return text.join("");
+        },
+      }
+      var northAmericaChartPlugins = {
+        beforeDraw: function(chart) {
+          var width = chart.chart.width,
+              height = chart.chart.height,
+              ctx = chart.chart.ctx;
+      
+          ctx.restore();
+          var fontSize = 3.125;
+          ctx.font = "600 " + fontSize + "em sans-serif";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#000";
+      
+          var text = "0",
+              textX = Math.round((width - ctx.measureText(text).width) / 2),
+              textY = height / 2;
+      
+          ctx.fillText(text, textX, textY);
+          ctx.save();
+        }
+      }
+      var northAmericaChartCanvas = $("#user-stats-chart").get(0).getContext("2d");
+      var northAmericaChart = new Chart(northAmericaChartCanvas, {
+        type: 'doughnut',
+        data: areaData,
+        options: areaOptions,
+        plugins: northAmericaChartPlugins
+      });
+      document.getElementById('user-stats-chart-legend').innerHTML = northAmericaChart.generateLegend();
+    }
+
+  });
+})(jQuery);
+   </script>
+{%endblock%}
+

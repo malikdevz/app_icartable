@@ -1,0 +1,85 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <!-- Required meta tags -->
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <title>{% block title %}ICARTABLE Acceuil{% endblock %}</title>
+  <!-- plugins:css -->
+  <link rel="stylesheet" href="{% static 'main_tmpl/vendors/ti-icons/css/themify-icons.css' %}">
+  <link rel="stylesheet" href="{% static 'main_tmpl/vendors/base/vendor.bundle.base.css' %}">
+  <link rel="stylesheet" href="{% static 'main_tmpl/css/style.css' %}">
+  <!-- endinject -->
+  <link rel="shortcut icon" href="{% static 'main_tmpl/images/favicon.png' %}" />
+</head>
+<body>
+  <div class="container-scroller">
+   <!--Banner-->
+   {% include 'main_tmpl/partials/_banner.html' %}
+    <!-- partial:partials/_navbar.html -->
+    {% include 'main_tmpl/partials/_navbar.html' %}
+    <!-- partial -->
+    <div class="container-fluid page-body-wrapper">
+      <!-- partial:partials/_sidebar.html -->
+     {% include 'main_tmpl/partials/_sidebar.html' %}
+      <!-- partial -->
+      <div class="main-panel">
+        <div class="content-wrapper">
+          <div class="row">
+            <div class="col-md-12 grid-margin bg-primary p-3">
+              <div class="d-flex justify-content-between align-items-center">
+                {% block header_title %}{% endblock %}
+                <div>
+                    {% block command_btn %}{%endblock%}
+                  <button type="button" class="btn btn-social-icon-text btn-primary m-1 text-white"><i class="ti-folder"></i> Fichiers</button>
+                    
+                    <button onclick="window.location.href='/mddocs_list'" type="button" class="btn btn-social-icon-text m-1 btn-primary text-white"><i class="ti-file"></i> Doc(s)</button>
+                    <button onclick="window.location.href='/public_docs'" type="button" class="btn btn-social-icon-text m-1 btn-primary text-white"><i class="ti-archive"></i> Ressource</button>
+                    <button onclick="window.location.href='/public_docs'" type="button" class="btn btn-social-icon-text m-1 btn-success text-white"><i class="ti-wand"></i> IA Generer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {% block content %}
+
+          {% endblock %}
+        </div>
+        <!-- content-wrapper ends -->
+        <!-- partial:partials/_footer.html -->
+        {% include 'main_tmpl/partials/_footer.html' %}
+        <!-- partial -->
+      </div>
+      <!-- main-panel ends -->
+    </div>
+    <!-- page-body-wrapper ends -->
+  </div>
+  <!-- container-scroller -->
+<!-- container-scroller -->
+{% block modal_popup %}{%endblock%}
+  <!-- plugins:js -->
+  <script src="{% static 'main_tmpl/vendors/base/vendor.bundle.base.js' %}"></script>
+  <!-- endinject -->
+  <!-- Plugin js for this page-->
+  <script src="{% static 'main_tmpl/vendors/chart.js/Chart.min.js' %}"></script>
+  <script src="{% static 'main_tmpl/js/jquery.cookie.js' %}" type="text/javascript"></script>
+  <!-- End plugin js for this page-->
+  <!-- inject:js -->
+  <script src="{% static 'main_tmpl/js/off-canvas.js' %}"></script>
+  <script src="{% static 'main_tmpl/js/hoverable-collapse.js' %}"></script>
+  <script src="{% static 'main_tmpl/js/template.js' %}"></script>
+  <script src="{% static 'main_tmpl/js/todolist.js' %}"></script>
+  <!-- endinject -->
+  <!-- Custom js for this page-->
+  <script src="{% static 'main_tmpl/js/dashboard.js' %}"></script>
+  <!-- End custom js for this page-->
+   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+   <script src="{% static 'main_tmpl/js/scripts.js' %}?v=11"></script>
+  <!-- End custom js for this page-->
+   {% block custom_scripts %}{%endblock%}
+</body>
+
+</html>
+
