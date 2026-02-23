@@ -26,7 +26,9 @@ from .views import  (
     MdDocsList,
     download_doc,
     MdDocsPublicList,
-    ShowDocDetails
+    ShowDocDetails,
+    share_doc,
+    unshare_doc
 )
 
 urlpatterns = [
@@ -55,5 +57,7 @@ urlpatterns = [
     path('mddocs_list', MdDocsList.as_view(), name="mddocs_list"),
     path('download_md_doc',download_doc, name="download_md_doc"),
     path('public_docs', MdDocsPublicList.as_view(), name="public_docs"),
-    path('show_document', ShowDocDetails.as_view(), name="show_document")
+    path('show_document', ShowDocDetails.as_view(), name="show_document"),
+    path('share_doc', share_doc, name="share_doc"),
+    path('unshare_doc', unshare_doc, name="unshare_doc")
 ]

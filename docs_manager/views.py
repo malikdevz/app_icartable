@@ -768,6 +768,47 @@ def download_doc(request):
     else:
         return redirect("mddocs_list")
 
+def share_doc(request):
+    next_p=request.GET.dict().get("next", None)
+    if request.user.is_authenticated:
+        #must be owner
+        code_ref=request.GET.dict().get("doc_ref", None)
+        try:
+            doc=MdDocs.objects.get(ref=code_ref)
+            if doc.user == request.user:
+                doc.is_public=True
+                doc.save()
+                messages.success(request, "Reussi le document est maintenant partager avec le public")
+                return redirect(f"/show_document?doc_ref={doc.ref}")
+            else:
+                messages.error(request, "Seul le proprietaire peut partager le fichier dans le domaine public")
+        except:
+            messages.error(request, "doc ref manquant ou impossible de retrouver le fichier")
+    else:
+        messages.error(request, "vous devez etre connecter pour partager le doc!")
+    return redirect(next_p if next_p else "mddocs_list")
+
+def unshare_doc(request):
+    next_p=request.GET.dict().get("next", None)
+    if request.user.is_authenticated:
+        #must be owner
+        code_ref=request.GET.dict().get("doc_ref", None)
+        try:
+            doc=MdDocs.objects.get(ref=code_ref)
+            if doc.user == request.user:
+                doc.is_public=False
+                doc.save()
+                messages.success(request, "Reussi, le document n'es plus accessible en public")
+                return redirect(f"/show_document?doc_ref={doc.ref}")
+            else:
+                messages.error(request, "Seul le proprietaire peut partager le fichier dans le domaine public")
+        except Exception as exc:
+            print(exc)
+            messages.error(request, "doc ref manquant ou impossible de retrouver le fichier")
+    else:
+        messages.error(request, "vous devez etre connecter pour partager le doc!")
+    return redirect(next_p if next_p else "mddocs_list")
+
 
 def logout_view(request):
     logout(request)

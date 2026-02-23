@@ -32,7 +32,10 @@ def validate_divers_size(value):
 def user_directory_path(instance, filename):
     folder_name=slugify(instance.user.username)
     folder_name=f"user_{folder_name}_folder"
-    return os.path.join(folder_name,instance.ref,filename)
+    ext = filename.split('.')[-1]  # récupérer extension
+    new_filename = f"{slugify(instance.title)}.{ext}"
+
+    return os.path.join(folder_name,instance.ref,new_filename)
 
 def attached_images_dir(instance, filename):
     root=slugify(f"user_{instance.doc.user.username}_folder")
@@ -103,6 +106,7 @@ class MdDocs(models.Model):
         if not self.ref:
             self.ref=generate_doc_ref(MdDocs)
         super().save(*args, **kwargs)
+
     @property
     def doc_name(self):
         return os.path.basename(self.doc.name)
