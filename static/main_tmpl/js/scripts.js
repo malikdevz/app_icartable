@@ -44,3 +44,22 @@ function change_profile_pic(){
     cancelButtonAriaLabel: "Thumbs down"
     });
 }
+
+
+function delete_doc(doc_ref){
+        Swal.fire({
+        title: "Vous confirmer vouloir supprimer ce document ?",
+        text:'cette action est irreversible',
+        showDenyButton: false,
+        showCancelButton: true,
+        confirmButtonText: "Supprimer",
+        }).then((result) => {
+        if (result.isConfirmed) {
+            //Swal.fire("Saved!", "", "success");
+            window.location.href="/delete_doc?doc_ref="+doc_ref+"&next=/show_document?doc_ref="+doc_ref;
+        } else if (result.isDenied) {
+            //Swal.fire("Changes are not saved", "", "info");
+        }
+        });
+
+}

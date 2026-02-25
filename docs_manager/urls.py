@@ -28,7 +28,9 @@ from .views import  (
     MdDocsPublicList,
     ShowDocDetails,
     share_doc,
-    unshare_doc
+    unshare_doc,
+    delete_doc,
+    EditMdDocInfos
 )
 
 urlpatterns = [
@@ -59,5 +61,7 @@ urlpatterns = [
     path('public_docs', MdDocsPublicList.as_view(), name="public_docs"),
     path('show_document', ShowDocDetails.as_view(), name="show_document"),
     path('share_doc', share_doc, name="share_doc"),
-    path('unshare_doc', unshare_doc, name="unshare_doc")
+    path('unshare_doc', unshare_doc, name="unshare_doc"),
+    path('delete_doc',delete_doc,name="delete_doc"),
+    path('edit_doc_infos', EditMdDocInfos.as_view(), name="edit_doc_infos")
 ]

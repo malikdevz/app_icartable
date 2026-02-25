@@ -1,0 +1,178 @@
+{% extends "main_tmpl/base.html" %}
+{% block title %}
+ICARTABLE - Mon compte
+{%endblock%}
+
+{% block header_title %}
+<div>
+  <h4 class="font-weight-bold mb-0 text-white">{{doc.ref}}<i class="ti-angle-right"></i> {{doc.title}}</h4>
+</div>
+{% endblock %}
+
+{% block command_btn %}
+
+{%endblock%}
+
+{% block content %}
+<div class="row">
+   <div class="col-12">
+              {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                    <li class="text-danger">{{ message }}</li>
+                                {% else %}
+                                    <li class="text-success">{{ message }}</li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+            </div>
+
+
+          </div>
+          <div class="col-md-12 grid-margin stretch-card" id="edit-doc">
+              <div class="card position-relative">
+                <div class="card-body">
+                  <h4>Modifier les info du document</h4>
+                  {% if messages %}
+                            <ul class="messages">
+                                {% for message in messages %}
+                                {% if message.tags == 'error' %}
+                                    <li class="text-danger">{{ message }}</li>
+                                {% else %}
+                                    <li class="text-success">{{ message }}</li>
+                                {% endif %}
+                                {% endfor %}
+                            </ul>
+                            {% endif %}
+            <div class="row">
+            <form method="post" action="" id="edit-form">
+                        {% csrf_token %}
+                        <div class="col-8" style="text-align:left !important">
+                    <div class="form-group">
+                      <label>Titre document</label>
+                      <div class="input-group">
+                        <div class="input-group-prepend bg-transparent">
+                          <span class="input-group-text bg-transparent border-right-0">
+                            <i class="ti-user text-primary"></i>
+                          </span>
+                        </div>
+                        <input type="text" value="{{doc.title}}" name="doc_title" class="form-control form-control-lg border-left-0" placeholder="Prenom" required>
+                      </div>
+                    </div>
+                    <input type="hidden" name='doc_ref' value='{{doc.ref}}'/>
+                    <div class="form-group">
+                      <label>Partager avec le public :</label>
+                      <select class="form-control form-control-lg" style="background:white;color:black" id="exampleFormControlSelect2" name="partage" required>
+                        <option value="no">Non</option>
+                        <option value="yes">Oui</option>
+                      </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-icon-text btn-rounded text-white">Valider</button>
+
+                </div>
+                </form>
+        </div>
+            
+          </div>
+          </div>
+          </div>
+{%endblock%}
+{% block custom_scripts %}
+   <script>
+
+
+    function copy_doc_ref(btn){
+      navigator.clipboard.writeText(btn.getAttribute("doc_ref"))
+        .then(() => {
+            alert("code ref copié avec success !");
+        })
+        .catch(err => {
+            console.error("Erreur :", err);
+        })
+    }
+
+
+    (function($) {
+  'use strict';
+  $(function() {
+    if ($("#user-stats-chart").length) {
+      var areaData = {
+        labels: ["Jan", "Feb", "Mar"],
+        datasets: [{
+            data: [100, 50, 50],
+            backgroundColor: [
+              "#71c016", "#8caaff", "#248afd",
+            ],
+            borderColor: "rgba(0,0,0,0)"
+          }
+        ]
+      };
+      var areaOptions = {
+        responsive: true,
+        maintainAspectRatio: true,
+        segmentShowStroke: false,
+        cutoutPercentage: 78,
+        elements: {
+          arc: {
+              borderWidth: 4
+          }
+        },      
+        legend: {
+          display: false
+        },
+        tooltips: {
+          enabled: true
+        },
+        legendCallback: function(chart) { 
+          var text = [];
+          text.push('<div class="report-chart">');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[0] + '"></div><p class="mb-0">Nbr lecture</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[1] + '"></div><p class="mb-0">Nbr clonage</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+            text.push('<div class="d-flex justify-content-between mx-4 mx-xl-5 mt-3"><div class="d-flex align-items-center"><div class="me-3" style="width:20px; height:20px; border-radius: 50%; background-color: ' + chart.data.datasets[0].backgroundColor[2] + '"></div><p class="mb-0">Nbr telechargement</p></div>');
+            text.push('<p class="mb-0">0</p>');
+            text.push('</div>');
+          text.push('</div>');
+          return text.join("");
+        },
+      }
+      var northAmericaChartPlugins = {
+        beforeDraw: function(chart) {
+          var width = chart.chart.width,
+              height = chart.chart.height,
+              ctx = chart.chart.ctx;
+      
+          ctx.restore();
+          var fontSize = 3.125;
+          ctx.font = "600 " + fontSize + "em sans-serif";
+          ctx.textBaseline = "middle";
+          ctx.fillStyle = "#000";
+      
+          var text = "0",
+              textX = Math.round((width - ctx.measureText(text).width) / 2),
+              textY = height / 2;
+      
+          ctx.fillText(text, textX, textY);
+          ctx.save();
+        }
+      }
+      var northAmericaChartCanvas = $("#user-stats-chart").get(0).getContext("2d");
+      var northAmericaChart = new Chart(northAmericaChartCanvas, {
+        type: 'doughnut',
+        data: areaData,
+        options: areaOptions,
+        plugins: northAmericaChartPlugins
+      });
+      document.getElementById('user-stats-chart-legend').innerHTML = northAmericaChart.generateLegend();
+    }
+
+  });
+})(jQuery);
+   </script>
+{%endblock%}
+

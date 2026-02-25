@@ -573,6 +573,34 @@ class ShowDocDetails(LoginRequiredMixin, View):
         }
 
         return render(request, 'main_tmpl/pages/show_document.html',data) 
+    
+    def post(self,request):
+        doc_ref=request.POST.dict().get("doc_ref",None)
+        doc_title=request.POST.dict().get("doc_title",None)
+        doc_share=request.POST.dict().get("partage",None)
+
+        try:
+            doc=MdDocs.objects.get(ref=doc_ref)
+            if doc.user != request.user:
+                messages.error(request, "Seul le proprietaire de ce document peut le modifier")
+                return redirect(f"/show_document?doc_ref={doc_ref}")
+            if len(doc_title ) >= 3 and doc_title != doc.title:
+                doc.title=doc_title
+                doc.save()
+                messages.success(request, "Le titre du document a etait modifier avec success!")
+            if doc.is_public and doc_share == "no":
+                doc.is_public=False
+                messages.success(request, "Le partager en public a etait desactiver")
+
+            if not doc.is_public and doc_share == "yes":
+                doc.is_public=True
+                messages.success(request, "Le document est maintenant partager avec le public!")
+            doc.save()
+                
+        except:
+            messages.error(request,"Ops! nous ne parvenons pas a recuperer ce document")
+
+        return redirect(f"/show_document?doc_ref={doc_ref}")
 
 class DeleteUser(LoginRequiredMixin, View):
     def get(self, request):
@@ -813,3 +841,78 @@ def unshare_doc(request):
 def logout_view(request):
     logout(request)
     return redirect("user_login")
+
+#------------25/02/2026===============================
+#=====================================================
+def delete_doc(request):
+    next_url=request.GET.dict().get("next",None)
+    doc_ref=request.GET.dict().get("doc_ref",None)
+    if request.method == "GET":
+        if request.user.is_authenticated:
+            try:
+                doc=MdDocs.objects.get(ref=doc_ref)
+                if doc.user == request.user:
+                    doc.delete()
+                else:
+                    messages.error(request,"Seul le proprietaire peu supprimer ce document")
+                    return redirect(f"/show_document?doc_ref={doc_ref}")
+                return redirect("mddocs_list")
+            except Exception as exc:
+                print(exc)
+                messages.error(request,"Ops! Quelque chose s'est mal passer")
+                return redirect(f"/show_document?doc_ref={doc_ref}")
+        else:
+            return redirect("user_login")
+    else:
+        messages.error(request, "Method not allowed")
+        return redirect(f"/show_document?doc_ref={doc_ref}")
+
+class EditMdDocInfos(LoginRequiredMixin, View):
+
+    def get(self, request):
+        try:
+            doc=MdDocs.objects.get(ref=request.GET.dict().get("doc_ref", None))
+        except:
+            messages.error(request, "Ce document n'existe pas /plus")
+            if "next" in request.GET.dict().keys():
+                return redirect(request.GET.dict().get("next"))
+            else:
+                return redirect("mddocs_list")
+                
+        data={
+            "user":request.user,
+            "doc":doc
+
+        }
+
+        return render(request, 'main_tmpl/pages/edit_document_infos.html',data)
+    
+    def post(self,request):
+        doc_ref=request.POST.dict().get("doc_ref",None)
+        doc_title=request.POST.dict().get("doc_title",None)
+        doc_share=request.POST.dict().get("partage",None)
+
+        try:
+            doc=MdDocs.objects.get(ref=doc_ref)
+            if doc.user != request.user:
+                messages.error(request, "Seul le proprietaire de ce document peut le modifier")
+                return redirect(f"/show_document?doc_ref={doc_ref}")
+            if len(doc_title ) >= 3 and doc_title != doc.title:
+                doc.title=doc_title
+                doc.save()
+                messages.success(request, "Le titre du document a etait modifier avec success!")
+            
+            if doc_share == "no":
+                share=False
+                messages.success(request, "Le partager en public a etait desactiver")
+            elif doc_share == "yes":
+                share=True
+                messages.success(request, "Le document est maintenant partager avec le public!")
+            doc.is_public=share
+            doc.save()
+
+                
+        except:
+            messages.error(request,"Ops! nous ne parvenons pas a recuperer ce document")
+
+        return redirect(f"/show_document?doc_ref={doc_ref}")

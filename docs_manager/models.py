@@ -102,9 +102,46 @@ class MdDocs(models.Model):
     def __str__(self):
         return self.title
     
-    def save(self,*args, **kwargs):
+    """def save(self,*args, **kwargs):
         if not self.ref:
             self.ref=generate_doc_ref(MdDocs)
+        if self.pk:
+            old_instance = MdDocs.objects.get(pk=self.pk)
+        
+        super().save(*args, **kwargs)"""
+
+    def save(self, *args, **kwargs):
+        if not self.ref:
+            self.ref=generate_doc_ref(MdDocs)
+        # Vérifier si objet existe déjà (update)
+        if self.pk:
+            old_instance = MdDocs.objects.get(pk=self.pk)
+            print(old_instance)
+            print(old_instance.doc.path)
+
+            # Si le titre a changé
+            if old_instance.title != self.title and self.doc:
+                print("titre change")
+                old_path = old_instance.doc.path
+                print(old_path)
+                ext = old_path.split('.')[-1]
+                new_filename = f"{slugify(self.title)}.{ext}"
+                new_path = os.path.join(
+                    os.path.dirname(old_path),
+                    new_filename
+                )
+                print(new_path)
+
+                # Renommer physiquement le fichier
+                if os.path.exists(old_path):
+                    os.rename(old_path, new_path)
+
+                # Mettre à jour le champ doc
+                self.doc.name = os.path.join(
+                    os.path.dirname(self.doc.name),
+                    new_filename
+                )
+
         super().save(*args, **kwargs)
 
     @property

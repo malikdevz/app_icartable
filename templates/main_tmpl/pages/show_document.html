@@ -5,7 +5,7 @@ ICARTABLE - Mon compte
 
 {% block header_title %}
 <div>
-  <h4 class="font-weight-bold mb-0 text-white"><i class="ti-angle-right"></i> {{doc.title}}</h4>
+  <h4 class="font-weight-bold mb-0 text-white">{{doc.ref}}<i class="ti-angle-right"></i> {{doc.title}}</h4>
 </div>
 {% endblock %}
 
@@ -29,7 +29,7 @@ ICARTABLE - Mon compte
                             {% endif %}
             </div>
     <div class="col-12 my-2">
-        <button title="Modifier les details du document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+        <button onclick="window.location.href='/edit_doc_infos?doc_ref={{doc.ref}}'" title="Modifier les details du document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
             <i class="ti-pencil btn-icon-prepend"></i>
             Modifier
             </button>
@@ -37,7 +37,7 @@ ICARTABLE - Mon compte
             <i class="ti-pencil-alt btn-icon-prepend"></i>
             Editer
             </button>
-        <button title="Supperimer le document" type="button" class="btn btn-danger btn-icon-text btn-rounded text-white">
+        <button onclick="delete_doc('{{doc.ref}}')" title="Supperimer le document" type="button" class="btn btn-danger btn-icon-text btn-rounded text-white">
             <i class="ti-trash btn-icon-prepend"></i>
             Supprimer
             </button>
@@ -142,6 +142,7 @@ ICARTABLE - Mon compte
               </div>
             </div>
           </div>
+ 
 {%endblock%}
 {% block custom_scripts %}
    <script>
