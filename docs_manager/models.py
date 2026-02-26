@@ -8,6 +8,7 @@ import string
 from pathlib import Path
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
+from django.core.files.base import ContentFile
 
 def validate_images_size(value):
     max_size = 1 * 1024 * 1024  # 2MB
@@ -102,45 +103,46 @@ class MdDocs(models.Model):
     def __str__(self):
         return self.title
     
-    """def save(self,*args, **kwargs):
-        if not self.ref:
-            self.ref=generate_doc_ref(MdDocs)
-        if self.pk:
-            old_instance = MdDocs.objects.get(pk=self.pk)
-        
-        super().save(*args, **kwargs)"""
-
     def save(self, *args, **kwargs):
+        # Générer la référence si elle n'existe pas (pour les nouveaux objets)
         if not self.ref:
-            self.ref=generate_doc_ref(MdDocs)
-        # Vérifier si objet existe déjà (update)
+            self.ref = generate_doc_ref(MdDocs)
+
+        # Si l'objet est mis à jour (il a déjà une clé primaire)
         if self.pk:
-            old_instance = MdDocs.objects.get(pk=self.pk)
-            print(old_instance)
-            print(old_instance.doc.path)
+            try:
+                old_instance = MdDocs.objects.get(pk=self.pk)
+                
+                # Vérifier si le titre a changé et si un ancien document existe
+                if old_instance.title != self.title and old_instance.doc:
+                    old_doc_name = old_instance.doc.name
+                    
+                    # Extraire l'extension du fichier
+                    ext = old_doc_name.split('.')[-1]
+                    
+                    # Construire le nouveau nom de fichier
+                    new_filename = f"{slugify(self.title)}.{ext}"
+                    new_doc_name = os.path.join(
+                        os.path.dirname(old_doc_name),
+                        new_filename
+                    )
 
-            # Si le titre a changé
-            if old_instance.title != self.title and self.doc:
-                print("titre change")
-                old_path = old_instance.doc.path
-                print(old_path)
-                ext = old_path.split('.')[-1]
-                new_filename = f"{slugify(self.title)}.{ext}"
-                new_path = os.path.join(
-                    os.path.dirname(old_path),
-                    new_filename
-                )
-                print(new_path)
+                    # 1. Lire le contenu de l'ancien fichier en mémoire
+                    if self.doc.storage.exists(old_doc_name):
+                        old_file_content = old_instance.doc.read()
+                        
+                        # 2. Sauvegarder ce contenu dans un nouveau fichier sur Minio
+                        self.doc.storage.save(new_doc_name, ContentFile(old_file_content))
+                        
+                        # 3. Mettre à jour le champ du modèle pour pointer vers le nouveau fichier
+                        self.doc.name = new_doc_name
+                        
+                        # 4. Supprimer l'ancien fichier de Minio
+                        self.doc.storage.delete(old_doc_name)
 
-                # Renommer physiquement le fichier
-                if os.path.exists(old_path):
-                    os.rename(old_path, new_path)
-
-                # Mettre à jour le champ doc
-                self.doc.name = os.path.join(
-                    os.path.dirname(self.doc.name),
-                    new_filename
-                )
+            except MdDocs.DoesNotExist:
+                # L'ancien objet n'existe pas, il s'agit donc d'une création
+                pass
 
         super().save(*args, **kwargs)
 

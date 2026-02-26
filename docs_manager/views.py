@@ -512,7 +512,7 @@ class MdDocsPublicList(LoginRequiredMixin, View):
         user=request.user
         
         data={
-            "docs":[doc for doc in MdDocs.objects.filter(is_public=True)],
+            "docs":[doc for doc in MdDocs.objects.filter(is_public=True) if doc.user != request.user],
             "nbr_page":int(User.objects.all().count()/nbr_per_page),
             "current_p":int(request.GET.dict().get('page') if 'page' in request.GET.dict().keys() else 1),
             "current_url":request.build_absolute_uri(),
@@ -571,6 +571,15 @@ class ShowDocDetails(LoginRequiredMixin, View):
             "doc":doc
 
         }
+        if doc.user != request.user:
+            #is a public doc
+            data['docs']=[doc_ for doc_ in MdDocs.objects.filter(is_public=True) if doc_.user != request.user and doc_ != doc]
+            data['is_public_doc']=True
+
+        if doc.user == request.user:
+            #ismy doc
+            data['docs']=[doc_ for doc_ in MdDocs.objects.filter(user=request.user) if doc_ != doc]
+            data['is_public_doc']=False
 
         return render(request, 'main_tmpl/pages/show_document.html',data) 
     
@@ -891,6 +900,7 @@ class EditMdDocInfos(LoginRequiredMixin, View):
         doc_ref=request.POST.dict().get("doc_ref",None)
         doc_title=request.POST.dict().get("doc_title",None)
         doc_share=request.POST.dict().get("partage",None)
+        share=None
 
         try:
             doc=MdDocs.objects.get(ref=doc_ref)
@@ -902,17 +912,19 @@ class EditMdDocInfos(LoginRequiredMixin, View):
                 doc.save()
                 messages.success(request, "Le titre du document a etait modifier avec success!")
             
-            if doc_share == "no":
+            if doc_share == "no" and doc.is_public:
                 share=False
                 messages.success(request, "Le partager en public a etait desactiver")
-            elif doc_share == "yes":
+            elif doc_share == "yes" and not doc.is_public:
                 share=True
                 messages.success(request, "Le document est maintenant partager avec le public!")
-            doc.is_public=share
-            doc.save()
+            if share is not None:
+                doc.is_public=share
+                doc.save()
 
                 
-        except:
+        except Exception as exc:
+            print(exc)
             messages.error(request,"Ops! nous ne parvenons pas a recuperer ce document")
 
         return redirect(f"/show_document?doc_ref={doc_ref}")

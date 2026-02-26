@@ -55,7 +55,7 @@ ICARTABLE - Mon compte
                       <div class="input-group">
                         <div class="input-group-prepend bg-transparent">
                           <span class="input-group-text bg-transparent border-right-0">
-                            <i class="ti-user text-primary"></i>
+                            <i class="ti-marker text-primary"></i>
                           </span>
                         </div>
                         <input type="text" value="{{doc.title}}" name="doc_title" class="form-control form-control-lg border-left-0" placeholder="Prenom" required>
@@ -65,8 +65,17 @@ ICARTABLE - Mon compte
                     <div class="form-group">
                       <label>Partager avec le public :</label>
                       <select class="form-control form-control-lg" style="background:white;color:black" id="exampleFormControlSelect2" name="partage" required>
-                        <option value="no">Non</option>
+                        {% if doc.is_public %}
+                        <option value="yes" selected>Oui</option>
+                        {% else %}
                         <option value="yes">Oui</option>
+                        {% endif %}
+                        {% if not doc.is_public %}
+                        <option value="no" selected>Non</option>
+                        {% else %}
+                        <option value="no">Non</option>
+                        {% endif %}
+                        
                       </select>
                     </div>
                     <button type="submit" class="btn btn-primary btn-icon-text btn-rounded text-white">Valider</button>
