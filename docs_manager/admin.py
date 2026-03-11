@@ -6,7 +6,8 @@ from .models import (
     MdDocsAttachedImages,
     MdDocsAttachedDivers,
     MdDocsAttachedAudio,
-    MdDocsAttachedVideos
+    MdDocsAttachedVideos,
+    BannedUsers,VerifiedUser
 )
 
 admin.site.register(VerificationCode)
@@ -16,3 +17,6 @@ admin.site.register(MdDocsAttachedImages)
 admin.site.register(MdDocsAttachedDivers)
 admin.site.register(MdDocsAttachedAudio)
 admin.site.register(MdDocsAttachedVideos)
+admin.site.register(BannedUsers)
+admin.site.register(VerifiedUser)
+

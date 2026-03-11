@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from django.contrib.auth import authenticate
+from django.contrib.auth import logout
 from django.views import View
 from django.contrib import messages
 from .models import *
@@ -11,21 +11,15 @@ from django.core.mail import send_mail
 from datetime import timedelta
 from django.utils import timezone
 from django.conf import settings
-from django.contrib.auth import logout, login
+
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.utils import timezone
+
 from django.core.paginator import Paginator
 from django.http import FileResponse, Http404
 import os
-
-def send_verification_code(user, title="ICARTABLE!"):
-    # Générer un code à 6 chiffres
-    code = ''.join(random.choices(string.digits, k=6))
-    expires_at = timezone.now() + timedelta(minutes=10)  # expire après 10 min
-
-    VerificationCode.objects.create(user=user, code=code, expires_at=expires_at)
-
-    send_mail(title,f"Hello {user.first_name}, votre code de confirmation est: {code}. valable pour 10 minutes",settings.EMAIL_HOST_USER,[user.email],fail_silently=False)
+#-------------
+from .tools import *
+#-------------
 
 
 
@@ -53,40 +47,30 @@ def check_password(password):
     return a_lettre and a_chiffre and a_symbole
 
 
-
+#========Fix Fat View, implement tools functions list=====================
+#11/03/2026
+#-------------------------------------------------------------------------
 class UserLogin(View):
 
     def get(self, request):
-        if request.user.is_authenticated:
-            if request.user.is_active:
+        if check_user_access(request.user) != -1:
+            if check_user_access(request.user) == -2:
+                return redirect("verify_account")
+            elif check_user_access(request.user) == -3:
+                return redirect("banned_account")
+            elif check_user_access(request.user) == 0:
+                if request.GET.dict().get("next"):
+                    return redirect(request.GET.dict().get("next"))
                 return redirect("dashboard")
-            elif BannedUser.objects.filter(user_id=request.user.username).exists():
-                messages.error(request, "Desolee! vous avez etait bani par l'administrateur")
         return render(request, 'main_tmpl/pages/login.html')
-    
+
+
     def post(self, request):
         data=request.POST.dict()
-        if data['identifiant'] and User.objects.filter(username=data['identifiant']).exists():
-            user=User.objects.get(username=data['identifiant'])
-            if not user.is_active and  BannedUser.objects.filter(user_id=user.username).exists():
-                messages.error(request, "Desolee! vous avez etait bani par l'administrateur, veuillez contacter l'equipe de support pour tout assistance!")
-                return redirect("user_login")
-            request.session['user_id']=user.username
-            if not user.is_active:
-                send_verification_code(user, title="ICARTABLE! Code de verification") 
-                return redirect("verify_code")
-
-
-        user = authenticate(username=data['identifiant'], password=data['password'])
-        if user is not None:
-            login(request,user)
-            request.session['identifiant']=data['identifiant']
-            if user.check_password("12345678"):
-                return redirect("change_password")
-            if request.GET.dict().get("next"):
-                return redirect(request.GET.dict().get("next"))
-            return redirect("dashboard")
-        messages.error(request, "Password et/ou Identifiant invalide!")
+        u_login=login_user(data,request)
+        if u_login['logged']:
+            return redirect("user_login")
+        messages.error(request,u_login['message'])
         return redirect("user_login")
 
 
@@ -139,34 +123,58 @@ class UserReg(View):
         send_verification_code(user, title="ICARTABLE, Code de verification de votre compte")
         return redirect("verify_code")
 
+class BannedAccount(LoginRequiredMixin,View):
 
-class VerifyAccount(View):
+    def get(self,request):
+        return render(request, "main_tmpl/pages/banned_account.html")
+
+class VerifyAccount(LoginRequiredMixin, View):
 
     def get(sefl, request):
+        
+        data={
+            "email":hide_email_part(request.user.email)
+        }
+        data['is_email']=False
+        if data['email'] != -1:
+            data['is_email']=True
+        return render(request, "main_tmpl/pages/verify_account.html",data)
+
+class VerifyCode(LoginRequiredMixin,View):
+
+    def get(sefl, request):
+
         return render(request, "main_tmpl/pages/verify_code.html")
     
     def post(self, request):
-        data={
-            "code":request.POST.dict().get("code"),
-            "user":User.objects.get(username=request.session['user_id']) if 'user_id' in request.session.keys() and User.objects.filter(username=request.session['user_id']).exists() else None
-        }
-        if not data['user']:
-            messages.error(request, "Utilisateur non reconnu, etes vous connecter ?")
-            return render(request, "main_tmpl/pages/verify_code.html",data)
+        check_code=check_verif_code(request.user,request.POST.dict())
+        if check_code == 0:
+            verify_user(request.user)
+            return redirect('verified_success')
 
-        if data['code']:
-            try:
-                check_code=check_code=VerificationCode.objects.filter(user=data['user'], code=data['code']).latest('created_at')
-                if check_code.is_valid():
-                    data['user'].is_active=True
-                    data['user'].save()
-                    data['activated']=True
-                    return render(request, "main_tmpl/pages/verify_code.html",data)
-                data['expiry_code']=True
-                messages.error(request, "Le delai pour ce code est deja exprirer!")
-            except VerificationCode.DoesNotExist:
-                messages.error(request, "Ce code est invalide!")
-        return render(request, "main_tmpl/pages/verify_code.html",data)
+        elif check_code == -1:
+            messages.error(request, "Vous avez fourni un code erronee")
+        elif check_code == -2:
+            messages.error(request, "Ce code est deja expiree, click sur renvoyer le code")
+
+        return render(request, "main_tmpl/pages/verify_code.html")
+
+class SendVerifCode(LoginRequiredMixin, View):
+
+    def get(self,request):
+        next_url=request.GET.dict().get("next",None)
+        if send_verification_code(request.user) == -1:
+            messages.error(request,"Erreur, nous n'avons pas pu envoyer le code, verifier votre connexion internet")
+            return redirect("verify_account")
+        if next_url:
+            return redirect(next_url)
+        return redirect("verify_code")
+
+class VerifiedSuccess(LoginRequiredMixin, View):
+
+    def get(self,request):
+        return render(request, "main_tmpl/pages/verified_success.html")
+#=======================END=======================================================
 
 
 class UserResetPassword(View):
@@ -757,18 +765,7 @@ def change_profile_pic(request):
         messages.erro(request,"Vous devez soumetre une requete POST pour modifier une photo de profile") 
     return redirect(f"/edit_account?user_id={user.username}")
 
-def send_code(request):
-    next_url=request.GET.dict().get("next",None)
-    if "user_id" in request.session.keys():
-        user=User.objects.get(username=request.session['user_id'])
-    else:
-        if request.user.is_authenticated:
-            user=request.user
-    send_verification_code(user, title="ICARTABLE! Code de verification")
-    messages.success(request, "Envoyer Ok!")
-    if next_url:
-        return redirect(next_url)
-    return redirect("verify_code")
+
 
 def reset_password(request):
     user_id=request.GET.dict().get("user_id",None)

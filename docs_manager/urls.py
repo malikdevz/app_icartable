@@ -9,7 +9,6 @@ from .views import  (
     VerifyAccount,
     Dashboard, 
     logout_view,
-    send_code,
     UserAccount,
     EditAccount,
     ChangeEmail,
@@ -30,19 +29,31 @@ from .views import  (
     share_doc,
     unshare_doc,
     delete_doc,
-    EditMdDocInfos
+    EditMdDocInfos,
+    BannedAccount,
+    VerifyCode,
+    SendVerifCode,
+    VerifiedSuccess
 )
 
 urlpatterns = [
     path('',  UserLogin.as_view(), name="user_login"),
     path('create_acc',UserReg.as_view(),name="create_acc"),
+    path('verify_account',VerifyAccount.as_view(),name="verify_account"),
+    path('banned_account',BannedAccount.as_view(),name="banned_account"),
+    path('send_verif_code',SendVerifCode.as_view(),name="send_verif_code"),
+    path('verified_success',VerifiedSuccess.as_view(),name="verified_success"),
+
+
+
+
     path('forgot_password', UserResetPassword.as_view(), name="forgot_password"),
     path('reset_pass',ResetPassCodeCheck.as_view(), name="reset_pass"),
     path('new_password',NewPassword.as_view(), name="new_password"),
-    path('verify_code',VerifyAccount.as_view(),name="verify_code"),
+    path('verify_code',VerifyCode.as_view(),name="verify_code"),
     path('dashboard', Dashboard.as_view(), name="dashboard"),
     path('user_logout',logout_view,name="user_logout"),
-    path('send_code',send_code,name="send_code"),
+    
     path('user_account', UserAccount.as_view(), name="user_account"),
     path('edit_account', EditAccount.as_view(),name="edit_account"),
     path('change_email', ChangeEmail.as_view(), name="change_email"),

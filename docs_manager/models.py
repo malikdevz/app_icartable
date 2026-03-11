@@ -84,6 +84,13 @@ class BannedUser(models.Model):
     def __str__(self):
         return self.user_id
 
+class VerifiedUser(models.Model):
+    date_add=models.DateTimeField(auto_now_add=True)
+    user_id=models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.user_id
+
 class UserProfilePic(models.Model):
     date_add=models.DateTimeField(auto_now_add=True)
     photo=models.ImageField(upload_to="users_profile_pics", default="users_profile_pics/default.jpg")
@@ -201,4 +208,10 @@ class MdDocsAttachedDivers(models.Model):
     
     def __str__(self):
         return f"{self.doc.ref}-{self.file.url}"
+
+
+class BannedUsers(models.Model):
+    date_add=models.DateTimeField(auto_now_add=True)
+    user_id=models.CharField(max_length=50)
+    motif=models.TextField(default="n/a")
 

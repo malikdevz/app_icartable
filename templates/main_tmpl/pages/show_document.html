@@ -28,35 +28,35 @@ ICARTABLE - Mon compte
                             </ul>
                             {% endif %}
             </div>
-    <div class="col-12 my-2">
-      <div class="row">
-        <div class="col-12 col-md-9">
+    <div class="col-12" >
+      <div class="row m-0 p-0">
+        <div class="col-12 col-md-9" style="">
       {% if doc.user == user %}
-        <button onclick="window.location.href='/edit_doc_infos?doc_ref={{doc.ref}}'" title="Modifier les details du document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+        <button style="display: flex;flex-direction: column;" onclick="window.location.href='/edit_doc_infos?doc_ref={{doc.ref}}'" title="Modifier les details du document" type="button" class="mx-1 btn btn-light btn-xs text-primary">
             <i class="ti-pencil btn-icon-prepend"></i>
             Modifier
             </button>
-        <button title="Editer le contenu du document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+        <button style="display: flex;flex-direction: column;" title="Editer le contenu du document" type="button" class="btn btn-light btn-xs text-primary">
             <i class="ti-pencil-alt btn-icon-prepend"></i>
             Editer
             </button>
-        <button onclick="delete_doc('{{doc.ref}}')" title="Supperimer le document" type="button" class="btn btn-danger btn-icon-text btn-rounded text-white">
+        <button style="display: flex;flex-direction: column;" onclick="delete_doc('{{doc.ref}}')" title="Supperimer le document" type="button" class="mx-1 btn btn-light btn-xs text-primary">
             <i class="ti-trash btn-icon-prepend"></i>
             Supprimer
             </button>
           {% endif %}
-        <button title="Lire le document" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+        <button style="display: flex;flex-direction: column;" title="Lire le document" type="button" class="btn btn-light btn-xs text-primary">
             <i class="ti-book btn-icon-prepend"></i>
             Lecture
             </button>
-        <button onclick="window.location.href='/download_md_doc?doc_ref={{doc.ref}}'" title="Telecharger le fichier markdown" type="button" class="btn btn-primary btn-icon-text btn-rounded text-white">
+        <button style="display: flex;flex-direction: column;" onclick="window.location.href='/download_md_doc?doc_ref={{doc.ref}}'" title="Telecharger le fichier markdown" type="button" class="mx-1 btn btn-xs btn-light text-primary">
   
-                              <i class="ti-cloud-down text-white"></i>
+                              <i class="ti-cloud-down text-primary"></i>
                             
             Telecharger
             </button>
             {% if doc.user != user %}
-        <button title="Editer le contenu du document" type="button" class="btn btn-light btn-icon-text btn-rounded text-primary">
+        <button style="display: flex;flex-direction: column;" title="Editer le contenu du document" type="button" class="btn btn-light btn-icon-text btn-rounded text-primary">
             <i class="ti-layers-alt btn-icon-prepend"></i>
             Cloner ( 0 )
             </button>
@@ -68,12 +68,12 @@ ICARTABLE - Mon compte
                                
                     <div class="input-group">
                         
-                          <input type="text" value="" name="srch_wd" placeholder="Taper doc ref...." class="form-control form-control-lg border-left-0" id="src-doc" required>                        
-                        <div class="input-group-prepend bg-transparent">
-                              <button type="button" onclick="window.location.href=`/show_document?doc_ref=${document.getElementById('src-doc').value}`" class="input-group-text bg-primary border-right-0">
+                          <input type="text" value="" name="srch_wd" placeholder="Taper doc ref...." class="form-control form-control-sm border-left-0" id="src-doc" style="height: 30px;border-radius: 10px;" required>                        
+                        
+                              <button type="button" onclick="window.location.href=`/show_document?doc_ref=${document.getElementById('src-doc').value}`" class="input-group-text bg-primary border-30" style="height: 35px !important;border-radius: 10px;">
                                   <i class="ti-search text-white"></i>
                               </button>
-                          </div>
+                          
                         </div>
                         
               </div>
@@ -177,8 +177,19 @@ ICARTABLE - Mon compte
                                 {%if docs|length > 0%}
                                 {% for doc_ in docs %}
                                  <li>
-                                   <h5 class="font-weight-bold mb-0 text-muted" style="font-weight: normal !important;font-size: 14px !important;"><a href="/show_document?doc_ref={{doc_.ref}}">{{doc_.title}}</a> par {%if doc_.user == user %} Moi{%endif%} {%if doc_.user != user %}{{doc_.user.last_name}}{%endif%}
-                                  <br/>Rf: <b>{{doc_.ref}}</b>, Aj : {{doc_.date_add}}
+                                   <h5 class="font-weight-bold mb-0 text-muted" style="font-weight: normal !important;font-size: 14px !important;"><a href="/show_document?doc_ref={{doc_.ref}}" style="text-decoration: none;line-height: 10px;">{{doc_.title}}</a>
+                                    <table class="mt-2" style="width: 100%; font-size: 11px !important;">
+                                      <tr>
+                                        <td style="width: 50px;"><i class="ti-user text-primary"></i>{%if doc_.user == user %} Moi{%endif%} {%if doc_.user != user %}{{doc_.user.last_name}}{%endif%}</td>
+                                        <td> <i class="ti-calendar text-primary"></i> {{doc_.date_add}}</td>
+                                    
+                                      </tr>
+                                      <!--<tr>
+                                        <td>{{doc_.ref}}</td>
+                                      </tr>-->
+                                    </table>
+                                    
+                               
                                   </h5>
                                 </li>
                                 {% endfor %}

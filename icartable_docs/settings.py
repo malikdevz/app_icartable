@@ -28,7 +28,7 @@ SECRET_KEY = f'{os.getenv("SECRET_KEY")}'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["127.0.0.1","172.22.220.243"]
 
 
 # Application definition
@@ -42,7 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'docs_manager',
     'storages',
-    'django_cleanup.apps.CleanupConfig'
+    'django_cleanup.apps.CleanupConfig',
 ]
 
 MIDDLEWARE = [
