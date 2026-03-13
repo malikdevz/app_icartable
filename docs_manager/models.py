@@ -215,3 +215,13 @@ class BannedUsers(models.Model):
     user_id=models.CharField(max_length=50)
     motif=models.TextField(default="n/a")
 
+class UserInformations(models.Model):
+    date_add=models.DateTimeField(auto_now_add=True)
+    date_naissance=models.DateField(null=True)
+    sex=models.CharField(max_length=50, null=True)
+    user=models.OneToOneField(User, on_delete=models.CASCADE, related_name="user_infos")
+
+    @property
+    def is_verified(self):
+        return "yes" if VerifiedUser.objects.filter(user_id=self.user.username).exists() else "no"
+

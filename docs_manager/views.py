@@ -21,55 +21,47 @@ import os
 from .tools import *
 #-------------
 
-
-
-def userid_code_generator():
-    caracteres = string.ascii_uppercase + string.digits
-    return ''.join(random.choice(caracteres) for _ in range(6))
-
-#Outils
-def email_valide(email):
-    pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
-    return re.match(pattern, email) is not None
-
-def check_password(password):
-    # Étape 1 : Vérifier la longueur
-    if len(password) < 6:
-        return False
-    
-    # Étape 2 : Vérifier les types de caractères
-    a_lettre = any(c.isalpha() for c in password)
-    a_chiffre = any(c.isdigit() for c in password)
-    # On vérifie si le caractère est dans la liste des symboles (!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~)
-    a_symbole = any(c in string.punctuation for c in password)
-    
-    # Le mot de passe est valide seulement si TOUTES les conditions sont vraies
-    return a_lettre and a_chiffre and a_symbole
-
-
 #========Fix Fat View, implement tools functions list=====================
 #11/03/2026
 #-------------------------------------------------------------------------
-class UserLogin(View):
+class GenericAccessChecking(View):
 
-    def get(self, request):
+    #verifiy user accesss
+    def dispatch(self, request, *args, **kwargs):
         if check_user_access(request.user) != -1:
             if check_user_access(request.user) == -2:
                 return redirect("verify_account")
             elif check_user_access(request.user) == -3:
                 return redirect("banned_account")
-            elif check_user_access(request.user) == 0:
-                if request.GET.dict().get("next"):
-                    return redirect(request.GET.dict().get("next"))
-                return redirect("dashboard")
-        return render(request, 'main_tmpl/pages/login.html')
+            elif request.user.check_password("12345678"):
+                return redirect("change_password")
+
+        return super().dispatch(request, *args, **kwargs)
+
+
+class UserLogin(GenericAccessChecking,View):
+
+    def get(self, request):
+        data={}  
+        if request.user.is_authenticated:
+            return redirect("dashboard")          
+        #user are not connect but trying to connect, we con auto fill inputs with last input
+        if "user_id" in request.session.keys():
+            data["user_id"]=request.session['user_id']
+        if "user_pwd" in request.session.keys():
+            data["user_pwd"]=request.session['user_pwd']
+        return render(request, 'main_tmpl/pages/login.html',data)
 
 
     def post(self, request):
+        next_url=request.GET.dict().get("next",None)
         data=request.POST.dict()
         u_login=login_user(data,request)
+        request.session['user_id']=data['identifiant']
+        request.session['user_pwd']=data['password']
+
         if u_login['logged']:
-            return redirect("user_login")
+            return redirect(request.GET.dict().get('next') if request.GET.dict().get('next',None) else "dashboard")
         messages.error(request,u_login['message'])
         return redirect("user_login")
 
@@ -80,58 +72,33 @@ class UserReg(View):
         return render(request, "main_tmpl/pages/register.html")
     
     def post(self,request):
-        user_data={}
         data=request.POST.dict()
-        first_name=data.get("first_name", None)
-        last_name=data.get("last_name", None)
-        email=data.get("email", None)
-        password=data.get("password", None)
-        confirm_pass=data.get("confirm_pass", None)
-        type_acc=data.get("type_acc", None)
+        check_data=checking_user_data(data)
+        if check_data['success']:
+            if create_user_account(request,data) != -1:
+                #redirect to verify account
+                return redirect("registration_success")
+            else:
+                messages.error(request, "Ops! quelque chose a mal tourner, reessayer")
+        else:
+            messages.error(request, check_data['message'])
 
-        #processing data
-        if not first_name.isalpha() or not last_name.isalpha():
-            messages.error(request, "Nom et/ou Prenom contient des caracteres non autoriser")
-            return render(request, "main_tmpl/pages/register.html",data)
-        
-        if not email_valide(email):
-            messages.error(request, "vous devez renseignez une adresse email valide")
-            return render(request, "main_tmpl/pages/register.html",data)
-        
-        if not password == confirm_pass:
-            messages.error(request, "Le password et confirm pass doivent etre identique")
-            return render(request, "main_tmpl/pages/register.html",data)
-        
-        if not check_password(password):
-            messages.error(request, "Le mot de passe doit etre superieur ou egale a 6 caracteres, vous devez melanger les lettre, chiffres et caracteres speciaux pour un mot de passe solide.")
-            return render(request, "main_tmpl/pages/register.html",data)
-        
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Cette adresse email est deja utiliser pour un autre compte")
-            return render(request, "main_tmpl/pages/register.html",data)
-
-        user_id=userid_code_generator()
-        while User.objects.filter(username=user_id).exists():
-            user_id=userid_code_generator()
-        #type de compte
-        is_staff=True if type_acc == "staff" else False
-
-        user=User.objects.create_user(username=f"U{user_id}", password=password, email=email,first_name=first_name, last_name=last_name, is_staff=is_staff,is_active=False)
-        data['user']=user
-        request.session['user_id']=user.username
-        request.session['is_reg']=True
-        send_verification_code(user, title="ICARTABLE, Code de verification de votre compte")
-        return redirect("verify_code")
+        return render(request, "main_tmpl/pages/register.html",data)
 
 class BannedAccount(LoginRequiredMixin,View):
 
     def get(self,request):
+        #si on arrive a cette page alors que l'utilisateur n'es pas bani ce que il ya un souci
+        if not BannedUsers.objects.filter(user_id=request.user.username).exists():
+            return redirect('dashboard')
         return render(request, "main_tmpl/pages/banned_account.html")
 
 class VerifyAccount(LoginRequiredMixin, View):
 
     def get(sefl, request):
-        
+        #si on arrive a cette page alors que l'utilisateur est deja verifier ce que il ya un souci
+        if VerifiedUser.objects.filter(user_id=request.user.username).exists():
+            return redirect('dashboard')
         data={
             "email":hide_email_part(request.user.email)
         }
@@ -174,32 +141,118 @@ class VerifiedSuccess(LoginRequiredMixin, View):
 
     def get(self,request):
         return render(request, "main_tmpl/pages/verified_success.html")
-#=======================END=======================================================
+
+class RegistrationSuccess(LoginRequiredMixin, View):
+
+    def get(self,request):
+        data={
+            "user":request.user
+        }
+        return render(request, "main_tmpl/pages/registration_success.html",data)
 
 
-class UserResetPassword(View):
+class ChangePassword(LoginRequiredMixin,View):
+
+    def get(self, request):
+        data={
+            "user":request.user
+        }        
+        return render(request, 'main_tmpl/pages/change_password.html',data)
+    
+    def post(self, request):
+        data=request.POST.dict()
+        change_pwd=change_user_password(request.user, data)
+        if change_pwd == -1:
+            messages.error(request, "Ancien mot de passe incorrect!")
+        elif change_pwd == -2:
+            messages.error(request, "Mot de passe trop faible, doit etre minimum 6 caractere, melanger des lettres, des chiffres et des symboles")
+        elif change_pwd == -3:
+            messages.error(request, "Le mot de passe et confirme pass doivent etre identique!")
+        elif change_pwd == 0:
+            data['is_changed']=True
+            #messages.success(request,"votre mot de passe a etait modifier avec success vous pouvez vous connecter avec votre nouveau mot de passe")
+        
+        return render(request, 'main_tmpl/pages/change_password.html',data)
+
+class UserForgotPassword(View):
 
     def get(self, request):
 
         return render(request, 'main_tmpl/pages/forgot_pass.html')
     
     def post(self, request):
-        data={
-            "email":request.POST.dict().get('email', None)
-        }
-
-        if not email_valide(data['email']):
+        data=request.POST.dict()
+        check_email=check_user_email(data)
+        if check_email == -1:
             messages.error(request, "Veuillez inserer une adresse email valide svp!")
-            return render(request, 'main_tmpl/pages/forgot_pass.html',data)
+        elif check_email == -2:
+            messages.error(request, "Aucun utilisateur trouver avec cette adresse email!")
+        elif check_email == 0:
+            user=User.objects.get(email=data['email'])
+            send_verification_code(user)
+            request.session['email']=data['email']
+            return redirect('verify_code_forgot_pass')
 
-        if not User.objects.filter(email=data['email']).exists():
-            messages.error(request, "Aucun utilisateur trouve avec cette adresse email!")
-            return render(request, 'main_tmpl/pages/forgot_pass.html',data)
-        user=User.objects.get(email=data['email'])
-        request.session['user_id']=user.username
-        send_verification_code(user, title="ICARTABLE! Code de verification")
+        return render(request, 'main_tmpl/pages/forgot_pass.html',data)
 
-        return redirect("reset_pass")
+class VerifyCodeForgotPass(View):
+
+    def get(sefl, request):
+        return render(request, "main_tmpl/pages/verify_code_forgot_pass.html")
+    
+    def post(self, request):
+        user=User.objects.get(email=request.session['email'])
+        check_code=check_verif_code(user,request.POST.dict())
+
+        if check_code == 0:
+            request.session['email_verified']=True
+            return redirect("new_password")
+        elif check_code == -1:
+            messages.error(request, "Vous avez fourni un code erronee")
+        elif check_code == -2:
+            messages.error(request, "Ce code est deja expiree, click sur renvoyer le code")
+        return redirect("verify_code_forgot_pass")
+
+class NewPassword(View):
+
+    def get(self, request):
+        if "email_verified" not in request.session.keys() or not request.session['email_verified']:
+            return redirect("forgot_password")
+        return render(request, 'main_tmpl/pages/new_password.html')
+    
+    def post(self,request):
+        if "email_verified" not in request.session.keys() or not request.session['email_verified']:
+            return redirect("forgot_password")
+        data=request.POST.dict()
+        user=User.objects.get(email=request.session['email'])
+        set_new_pwd=set_user_password(user,data)
+
+        if set_new_pwd == -1:
+            messages.error(request, "Le mot de passe doit etre superieur ou egale a 6 caracteres, melanger les lettre, chiffres et symbole.")
+        elif set_new_pwd == -2:
+            messages.error(request, "Le mot de passe et confirm mot de passe doivent etre identique")
+        elif set_new_pwd == 0:
+            data['is_set']=True
+            data['user']=user
+
+        return render(request, 'main_tmpl/pages/new_password.html',data)
+
+class Dashboard(GenericAccessChecking,LoginRequiredMixin, View):
+
+    def get(self,request):
+        data={
+            "user":request.user
+        }
+        if not data['user'].is_active:
+            return redirect("user_logout")
+        request.session['user_id']=data['user'].username
+        data['docs']=MdDocs.objects.all()
+        return render(request, "main_tmpl/dashboard.html",data)
+ 
+#=======================END=======================================================
+
+
+
     
 class ResetPassCodeCheck(View):   
 
@@ -230,49 +283,6 @@ class ResetPassCodeCheck(View):
         else:
             messages.error(request, "Veuillez inserer un code valide svp!")
         return render(request, 'main_tmpl/pages/forgot_pass_verify_code.html',data)
-
-        
-
-class NewPassword(View):
-
-    def get(self, request):
-
-        return render(request, 'main_tmpl/pages/new_password.html')
-    
-    def post(self,request):
-        data={
-            "password":request.POST.dict().get('password'),
-            "confirm_password":request.POST.dict().get('confirm_pass')
-        }
-        if not data['password'] == data['confirm_password']:
-            messages.error(request, "Le password et confirm pass doivent etre identique")
-        if not check_password(data['password']):
-            messages.error(request, "Le mot de passe doit etre superieur ou egale a 6 caracteres, vous devez melanger les lettre, chiffres et caracteres speciaux pour un mot de passe solide.")
-        if not "user_id" in request.session.keys():
-            messages.error(request,"Votre session a expirer, veuillez recommencer!")
-        
-        try:
-            user=User.objects.get(username=request.session['user_id'])
-            user.set_password(data['password'])
-            user.save()
-            data['is_done']=True
-            data['user']=user
-        except:
-            messages.error(request,"Votre session a expirer, veuillez recommencer!")
-
-        return render(request, 'main_tmpl/pages/new_password.html',data)
-
-
-class Dashboard(LoginRequiredMixin, View):
-
-    def get(self,request):
-        data={
-            "user":request.user
-        }
-        if not data['user'].is_active:
-            return redirect("user_logout")
-        request.session['user_id']=data['user'].username
-        return render(request, "main_tmpl/dashboard.html",data)
 
 
 class UserAccount(LoginRequiredMixin, View):
@@ -697,40 +707,7 @@ class AddAccount(LoginRequiredMixin,View):
         return render(request, 'main_tmpl/pages/add_account.html',data)
 
 
-class ChangePassword(LoginRequiredMixin,View):
 
-    def get(self, request):
-        data={
-            "user":request.user
-        }
-        if data['user'].check_password("12345678"):
-            data['default_pass']=True
-        
-        return render(request, 'main_tmpl/pages/change_password.html',data)
-    
-    def post(self, request):
-        user=request.user
-        data={
-            "user":user
-        }
-        password=request.POST.dict().get("password")
-        new_password=request.POST.dict().get("new_pass")
-        confirm_new_pass=request.POST.dict().get("confirm_pass")
-        if not user.check_password(password):
-            messages.error(request, "Ancien mot de passe incorrect, reessayer svp")
-            return redirect("change_password")
-        if new_password != confirm_new_pass:
-            messages.error(request, "Nouveau mot de passe et confirme nouveau mot de passe doit etre identique")
-            return redirect("change_password")
-        
-        if not check_password(new_password):
-            messages.error(request, "Le mot de passe doit etre superieur ou egale a 6 caracteres, vous devez melanger les lettre, chiffres et caracteres speciaux pour un mot de passe solide.")
-            return redirect("change_password")
-        user.set_password(new_password)
-        user.save()
-        messages.success(request, "Votre mot de passe a etait modifier avec success!")
-        data['is_change_pwd']=True
-        return render(request, 'main_tmpl/pages/change_password.html',data)
 
 class UserSubscription(LoginRequiredMixin, View):
     

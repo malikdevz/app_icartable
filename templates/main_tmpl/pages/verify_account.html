@@ -54,14 +54,16 @@
                     {% endfor %}
                 </ul>
                 {% endif %}
-
-              
                 <div class="text-center mt-4 font-weight-light text-muted" style="font-size: 13px;">
                     {% if is_email %}
                         <a href="{% url 'send_verif_code' %}" class="btn btn-primary">Envoyer le code</a>
                     {%else%}
                     <span class="text-danger">Aucun email valide associe a ce compte</span>
                     {% endif %}
+                </div>
+                <div class="text-center mt-4 font-weight-light text-muted" style="font-size: 13px;">
+                 <a href="{% url 'user_logout' %}" class="text-primary">Acceuil</a>
+                  
                 </div>
               
             </div>

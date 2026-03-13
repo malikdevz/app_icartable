@@ -3,7 +3,7 @@ from django.urls import path
 from .views import  (
     UserLogin, 
     UserReg,
-    UserResetPassword,
+    UserForgotPassword,
     ResetPassCodeCheck,
     NewPassword,
     VerifyAccount,
@@ -33,7 +33,9 @@ from .views import  (
     BannedAccount,
     VerifyCode,
     SendVerifCode,
-    VerifiedSuccess
+    VerifiedSuccess,
+    RegistrationSuccess,
+    VerifyCodeForgotPass
 )
 
 urlpatterns = [
@@ -43,14 +45,20 @@ urlpatterns = [
     path('banned_account',BannedAccount.as_view(),name="banned_account"),
     path('send_verif_code',SendVerifCode.as_view(),name="send_verif_code"),
     path('verified_success',VerifiedSuccess.as_view(),name="verified_success"),
+    path('registration_success', RegistrationSuccess.as_view(), name="registration_success"),
+    path('forgot_password', UserForgotPassword.as_view(), name="forgot_password"),
+    path('verify_code',VerifyCode.as_view(),name="verify_code"),
+    path('verify_code_forgot_pass',VerifyCodeForgotPass.as_view(),name="verify_code_forgot_pass"),
+    path('new_password',NewPassword.as_view(), name="new_password"),
+    
 
 
 
 
-    path('forgot_password', UserResetPassword.as_view(), name="forgot_password"),
+    
     path('reset_pass',ResetPassCodeCheck.as_view(), name="reset_pass"),
     path('new_password',NewPassword.as_view(), name="new_password"),
-    path('verify_code',VerifyCode.as_view(),name="verify_code"),
+    
     path('dashboard', Dashboard.as_view(), name="dashboard"),
     path('user_logout',logout_view,name="user_logout"),
     
