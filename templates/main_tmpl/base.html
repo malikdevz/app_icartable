@@ -42,7 +42,11 @@
                 
                 <div>
                     {% block command_btn %}{%endblock%}
-                    <button onclick="window.location.href='/mddocs_list'" type="button" class="btn btn-light btn-social-icon-text mx-3" style="font-weight: bold !important;">Acceuil</button>
+                    {% if current_page == "dashboard" %}
+                    <button type="button" class="btn btn-light btn-social-icon-text mx-3" style="font-weight: bold !important;">Acceuil</button>
+                    {%else%}
+                    <button onclick="window.location.href='/dashboard'" type="button" class="btn text-white btn-social-icon-text mx-3" style="font-weight: bold !important;">Acceuil</button>
+                    {%endif%}
                     <button onclick="window.location.href='/mddocs_list'" type="button" class="btn btn-social-icon-text mx-3 text-white" style="font-weight: bold !important;">Mes document(s)</button>
                     <button onclick="window.location.href='/public_docs'" type="button" class="btn btn-social-icon-text text-white" style="font-weight: bold !important;">Document(s) public</button>
                   <button type="button" class="btn btn-social-icon-text text-white" style="font-weight: bold !important;">Fichiers</button>

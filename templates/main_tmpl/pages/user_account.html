@@ -20,8 +20,8 @@ ICARTABLE - Mon compte
 {% block content %}
 <di class="row mx-3 d-block bg-white">
   <div class="col-12 mb-2">
-    <button type="button" onclick="window.location='#statistics'" class="btn btn-rounded btn-md text-primary"><i class="ti-pencil"></i> Modifier profile</button>
-    <button type="button" onclick="window.location='#recent_docs'" class="btn btn-rounded btn-md text-primary"><i class="ti-image"></i> Changer photo</button>
+    <button type="button" onclick="window.location='/edit_account'" class="btn btn-rounded btn-md text-primary"><i class="ti-pencil"></i> Modifier profile</button>
+    <button type="button" onclick="window.location='/change_profile_pic'" class="btn btn-rounded btn-md text-primary"><i class="ti-image"></i> Changer photo</button>
     <button type="button" onclick="window.location='/change_password'" class="btn btn-rounded btn-md text-primary"><i class="ti-shield"></i> Modifier mot de passe</button>
   </div>
 </di>
@@ -31,46 +31,56 @@ ICARTABLE - Mon compte
             <div class="col-12 grid-margin stretch-card">
               <div class="card">
                 <div class="card-header">
-                  <h4><i class="ti-user"></i> Profile</h4>
+                  <h4><i class="ti-user"></i>  Profile</h4>
                 </div>
                 <div class="card-body">
                   <div class="row">
                     <div class="col-12 col-md-2">
-                      <img src="{{user.profile_pic.photo.url}}" alt="Photo de profile" style="width: 100%;"/>
+                      <img src="{{user.profile_pic.photo.url}}" alt="Photo de profile" style="width: 100%;border-radius: 5px;"/>
                     </div>
-                    <div class="col-12 col-md-10">
+                    <div class="col-12 col-md-10 text-muted">
                       <table>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">ID : </td>
-                          <td style="font-size: 14px;">{{user.username}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">ID : </td>
+                          <td class="py-2" style="font-size: 14px;">{{user.username}}</td>
                         </tr>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">Nom : </td>
-                          <td style="font-size: 14px;">{{user.first_name}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Nom : </td>
+                          <td class="py-2" style="font-size: 14px;">{{user.first_name}}</td>
                         </tr>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">Prenom : </td>
-                          <td style="font-size: 14px;">{{user.last_name}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Prenom : </td>
+                          <td class="py-2" style="font-size: 14px;">{{user.last_name}}</td>
                         </tr>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">Sex : </td>
-                          <td style="font-size: 14px;">{{user.user_infos.sex}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Sex : </td>
+                          <td class="py-2" style="font-size: 14px;">{{user.user_infos.sex}}</td>
                         </tr>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">Date naissance : </td>
-                          <td style="font-size: 14px;">{{user.user_infos.date_naissance}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Date naissance : </td>
+                          <td class="py-2" style="font-size: 14px;">{{user.user_infos.format_naiss_date}}</td>
                         </tr>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">Email : </td>
-                          <td style="font-size: 14px;">{{user.email}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Email : </td>
+                          <td class="py-2" style="font-size: 14px;">{{user.email}}</td>
                         </tr>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">Inscription: </td>
-                          <td style="font-size: 14px;">le {{user.date_joined}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Type de compte : </td>
+                          {% if user.is_staff and user.is_superuser %}
+                          <td class="py-2" style="font-size: 14px;">Admin</td>
+                          {% elif user.is_staff %}
+                          <td class="py-2" style="font-size: 14px;">Professeur</td>
+                          {% else %}
+                          <td class="py-2" style="font-size: 14px;">Eleve</td>
+                          {% endif %}
                         </tr>
                         <tr>
-                          <td style="font-size: 14px;font-weight: bold;">Compte verifier : </td>
-                          <td style="font-size: 14px;"> {{user.user_infos.is_verified}}</td>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Inscription: </td>
+                          <td class="py-2" style="font-size: 14px;">le {{user.date_joined}}</td>
+                        </tr>
+                        <tr>
+                          <td class="py-2" style="font-size: 14px;font-weight: bold;">Compte verifier : </td>
+                          <td class="py-2" style="font-size: 14px;"> {{user.user_infos.is_verified}}</td>
                         </tr>
                       </table>
                     </div>

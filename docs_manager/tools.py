@@ -7,10 +7,10 @@ import random
 import string
 import re
 from datetime import timedelta
-from datetime import datetime
+from datetime import datetime, date
 from django.core.mail import send_mail
 from django.conf import settings
-
+ 
 
 def check_and_format_date(date_string):
     """
@@ -18,10 +18,20 @@ def check_and_format_date(date_string):
     Exemple valide : 03/11/1990
     """
     try:
-        date_obj = datetime.strptime(date_string, "%d/%m/%Y").date()
-        return date_obj
-    except:
-        return None
+        birth_date = datetime.strptime(date_string, "%d/%m/%Y").date()
+        return birth_date
+    except Exception as exc:
+        return False
+
+def check_age(birth_date):
+    #check si le user a au moins 12 ans
+    today = date.today()
+    age = today.year - birth_date.year - (
+        (today.month, today.day) < (birth_date.month, birth_date.day)
+    )
+    if age < 12:
+        return False
+    return birth_date
 
 def userid_code_generator():
     caracteres = string.ascii_uppercase + string.digits
@@ -154,6 +164,9 @@ def checking_user_data(data):
     
     if not check_and_format_date(data['date_naissance']):
         return {"success":False, "message":"Date naissance format invalide. Utilisez dd/mm/yyyy (ex: 03/11/1990)"}
+    
+    if not check_age(data['date_naissance']):
+        return {"success":False, "message":"Vous devez avoir au moins 12 ans, (niveau lycee) pour creer un compte"}
 
     return {"success":True, "message":"all is okay"}
 
@@ -231,4 +244,43 @@ def set_user_password(user,data):
     user.set_password(data['new_pass'])
     user.save()
     return 0
+
+def edit_user_info(user, data):
+    """modifie les infos utilisateur
+    return -1 si le nom ou prenom sont invalide
+            0 si tout s'est bien passee
+    """
+    message=""
+    if data.get('first_name',None) and user.first_name != data['first_name']:
+        if not data['first_name'].isalpha():
+            return -1
+        else:
+            user.first_name=data['first_name']
+            user.save()
+            message+="Nom, "
+
+    if data.get('last_name',None) and user.last_name != data['last_name']:
+        if not data['last_name'].isalpha():
+            return -1
+        else:
+            user.last_name=data['last_name']
+            user.save()
+            message+="Prenom, "
+    #check if date naissance is valide
+    if data.get('date_naissance',None):
+        date_naissance=check_and_format_date(data.get('date_naissance'))
+        if date_naissance:
+            if check_age(date_naissance):
+                if user.user_infos.date_naissance != date_naissance:
+                    user.user_infos.date_naissance=date_naissance
+                    user.user_infos.save()
+                    message+="Date de naissance, "
+            else:
+                return -3
+        else:
+            return -2
+
+    if not message == "":
+        message+="modifier avec success"
+    return message
     

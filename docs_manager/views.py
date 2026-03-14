@@ -243,12 +243,52 @@ class Dashboard(GenericAccessChecking,LoginRequiredMixin, View):
         data={
             "user":request.user
         }
+        data['current_page']="dashboard"
         if not data['user'].is_active:
             return redirect("user_logout")
         request.session['user_id']=data['user'].username
         data['docs']=MdDocs.objects.all()
         return render(request, "main_tmpl/dashboard.html",data)
- 
+
+class EditAccount(GenericAccessChecking,LoginRequiredMixin, View):
+
+    def get(self, request):
+        data={
+            "user":request.user
+        }
+        return render(request, 'main_tmpl/pages/edit_account.html',data)
+    
+
+    def post(self, request):
+        data=request.POST.dict()
+        edit_res=edit_user_info(request.user, request.POST.dict())
+        if edit_res == -1:
+            messages.error(request,"Le nom ou prenom invalide, ne doit contenir que des lettres alpabetique.")
+        elif edit_res == -2:
+            messages.error(request, "Date de naissance invalide, format correct dd/mm/yyyy exemple : 02/12/2002")
+        elif edit_res == -3:
+            messages.error(request, "Date de naissance indique un age trop bas, minimum requis 12 ans (Eleve du lycee)")
+        else:
+            messages.info(request, edit_res)
+        return render(request, 'main_tmpl/pages/edit_account.html',data)
+
+class ChangeProfilePic(GenericAccessChecking,LoginRequiredMixin, View):
+
+    def get(self,request):
+        data={
+            "user":request.user
+        }
+        return render(request, 'main_tmpl/pages/change_profile_pic.html',data)
+    
+    def post(self, request):
+        user=request.user
+        if request.FILES['photo']:
+            #checking images
+            user.profile_pic.photo=request.FILES['photo']
+            user.profile_pic.save()
+            messages.success(request,"Photo de profile modifier avec success!")
+        return redirect("change_profile_pic")
+
 #=======================END=======================================================
 
 
@@ -298,67 +338,6 @@ class UserAccount(LoginRequiredMixin, View):
                 data['user']=request.user
         return render(request, 'main_tmpl/pages/user_account.html', data)
 
-class EditAccount(LoginRequiredMixin, View):
-
-    def get(self, request):
-        data={}
-        if not request.user.is_superuser:
-            data['user']=request.user
-        else:
-            if request.GET.dict().get("user_id",None):
-                try:
-                    data['user']=User.objects.get(username=request.GET.dict().get("user_id",None))
-                except:
-                    messages.error(request,"Cette utilisateur n'existe pas/plus!")
-            else:
-                data['user']=request.user
-        data["email_field_readonly"]=True if request.user.is_superuser and data['user'] != request.user else False
-        return render(request, 'main_tmpl/pages/edit_account.html',data)
-    
-
-    def post(self, request):
-        fdbck=False
-        data={
-            "first_name":request.POST.dict().get("first_name",None),
-            "last_name":request.POST.dict().get("last_name", None),
-            "identifiant":request.POST.dict().get("identifiant", None),
-            "email": request.POST.dict().get("email", None)
-        }
-        
-        try:
-            user=User.objects.get(username=data['identifiant'])
-            data['user']=user
-            data["email_field_readonly"]=True if request.user != user and request.user.is_superuser else False
-
-            if request.user != user and not request.user.is_superuser:
-                messages.error(request, "Vous n'avez pas l'autorisation d'effectuer cette operation!")
-                return render(request, 'main_tmpl/pages/edit_account.html',data)
-            
-
-            if data['email'] and user.email != data['email']:
-                if email_valide(data['email']):
-                    if User.objects.filter(email=data['email']).exists():
-                        messages.error(request, "Cette adresse email est deja associer a un compte")
-                        return render(request, 'main_tmpl/pages/edit_account.html',data)
-                    else:
-                        #change email warning
-                        data['confirm_change_email']=True
-                        request.session['email']=data['email']
-                else:
-                    messages.error(request, "Veuillez inserer une adresse email valide svp!")
-                    return render(request, 'main_tmpl/pages/edit_account.html',data)
-
-            if data['first_name'] and user.first_name != data['first_name']:
-                user.first_name=data['first_name']
-                user.save()
-                messages.success(request, "Nom modifier avec success ")
-            if data['last_name'] and data['last_name'] != user.last_name:
-                user.last_name=data['last_name']
-                user.save() 
-                messages.success(request, "Prenom modifier avec success ")
-        except Exception as exc:
-            messages.error(request, "Cette utilisateur n'existe plus!")
-        return render(request, 'main_tmpl/pages/edit_account.html',data)
 
 class UserStats(LoginRequiredMixin,View):
 

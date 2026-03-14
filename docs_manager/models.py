@@ -9,6 +9,8 @@ from pathlib import Path
 from django.core.validators import FileExtensionValidator
 from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
+from datetime import datetime
+
 
 def validate_images_size(value):
     max_size = 1 * 1024 * 1024  # 2MB
@@ -224,4 +226,10 @@ class UserInformations(models.Model):
     @property
     def is_verified(self):
         return "yes" if VerifiedUser.objects.filter(user_id=self.user.username).exists() else "no"
+    
+    @property
+    def format_naiss_date(self):
+        if self.date_naissance:
+            return self.date_naissance.strftime("%d/%m/%Y")
+        return ""
 
